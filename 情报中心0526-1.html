@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>情报指挥中心 · 航空航天 AI 研判平台 (全源推荐三列卡片版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { 50: '#eff0fe', 100: '#e0e2fe', 200: '#c6c8fd', 300: '#a4a7fc', 400: '#8181f8', 500: '#605CE5', 600: '#4d46db', 700: '#3f35be' }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f8fafc; color: #334155; font-family: 'Inter', sans-serif; }
+        .light-panel { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); }
+        .ai-typing { overflow: hidden; white-space: nowrap; border-right: 2px solid #605CE5; animation: typing 3s steps(40, end), blink-caret .75s step-end infinite; }
+        @keyframes typing { from { width: 0 } to { width: 100% } }
+        @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: #605CE5; } }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-thin::-webkit-scrollbar { width: 4px; height: 4px; }
+        .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        .heat-bar { background: linear-gradient(90deg, #f97316, #ef4444); }
+        .focus-card-img { transition: transform 0.2s ease; }
+        .focus-card:hover .focus-card-img { transform: scale(1.05); }
+        .rec-card { transition: all 0.2s ease; }
+        .rec-card:hover { transform: translateY(-2px); box-shadow: 0 12px 20px -12px rgba(0,0,0,0.15); border-color: #605CE5; }
+        .carousel-recommend { transition: opacity 0.6s ease-in-out; }
+        .card-hover-effect { transition: all 0.2s ease; }
+    </style>
+</head>
+<body class="min-h-screen antialiased selection:bg-primary-200">
+
+    <header class="relative bg-white border-b border-slate-200 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-lg bg-primary-50 border border-primary-100 flex items-center justify-center">
+                        <i class="fa-solid fa-satellite text-primary-500 text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold tracking-tight text-slate-800">情报指挥中心</h1>
+                        <p class="text-[10px] text-primary-500 uppercase font-semibold">AI Intelligence Core</p>
+                    </div>
+                </div>
+                <div class="hidden md:flex flex-1 max-w-2xl mx-8 relative">
+                    <input type="text" placeholder="输入装备型号、技术领域，或向 AI 提问 (例: 近期高超领域的专利突袭?)" class="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-full pl-11 pr-24 py-2 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500/20 transition-all hover:bg-white">
+                    <i class="fa-solid fa-wand-magic-sparkles absolute left-4 top-1/2 -translate-y-1/2 text-primary-400"></i>
+                    <button class="absolute right-1.5 top-1/2 -translate-y-1/2 bg-primary-500 hover:bg-primary-600 text-white text-xs px-3 py-1.5 rounded-full transition-colors shadow-sm">AI 研判</button>
+                </div>
+                <div class="hidden lg:flex items-center gap-6 text-sm">
+                    <div class="text-right">
+                        <p class="text-slate-500 text-[10px] font-medium uppercase tracking-wider">实时情报总库</p>
+                        <p class="font-mono text-base font-bold text-slate-800">128,450 <span class="text-emerald-500 text-xs font-sans font-medium">↑今日 +1,568</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        
+        <!-- 快捷入口库 (横向导航) -->
+        <section class="relative group mb-8">
+            <button onclick="scrollNav('nav-scroll', -240)" class="absolute -left-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 bg-white border border-slate-200 rounded-full shadow-md flex items-center justify-center text-slate-600 hover:text-blue-900 transition-all opacity-0 group-hover:opacity-100">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <div id="nav-scroll" class="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth py-2 px-1">
+                <div class="shrink-0 w-40 h-28 rounded-lg overflow-hidden relative cursor-pointer hover:scale-[1.05] transition-all shadow-sm border border-slate-200"><img src="https://picsum.photos/seed/news/300/200" class="w-full h-full object-cover"><div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-3 flex flex-col justify-end text-white"><span class="text-xs font-bold">资讯库</span><span class="text-[10px] opacity-80">+124 | 10m前</span></div></div>
+                <div class="shrink-0 w-40 h-28 rounded-lg overflow-hidden relative cursor-pointer hover:scale-[1.05] transition-all shadow-sm border border-slate-200"><img src="https://picsum.photos/seed/book/300/200" class="w-full h-full object-cover"><div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-3 flex flex-col justify-end text-white"><span class="text-xs font-bold">文献库</span><span class="text-[10px] opacity-80">+45 | 30m前</span></div></div>
+                <div class="shrink-0 w-40 h-28 rounded-lg overflow-hidden relative cursor-pointer hover:scale-[1.05] transition-all shadow-sm border border-slate-200"><img src="https://picsum.photos/seed/patent/300/200" class="w-full h-full object-cover"><div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-3 flex flex-col justify-end text-white"><span class="text-xs font-bold">专利库</span><span class="text-[10px] opacity-80">+12 | 2h前</span></div></div>
+                <div class="shrink-0 w-40 h-28 rounded-lg overflow-hidden relative cursor-pointer hover:scale-[1.05] transition-all shadow-sm border border-slate-200"><img src="https://picsum.photos/seed/jet/300/200" class="w-full h-full object-cover"><div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-3 flex flex-col justify-end text-white"><span class="text-xs font-bold">装备库</span><span class="text-[10px] opacity-80">+3 | 08:30</span></div></div>
+                <div class="shrink-0 w-40 h-28 rounded-lg overflow-hidden relative cursor-pointer hover:scale-[1.05] transition-all shadow-sm border border-slate-200"><img src="https://picsum.photos/seed/person/300/200" class="w-full h-full object-cover"><div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-3 flex flex-col justify-end text-white"><span class="text-xs font-bold">人物库</span><span class="text-[10px] opacity-80">+8 | 昨天</span></div></div>
+                <div class="shrink-0 w-40 h-28 rounded-lg overflow-hidden relative cursor-pointer hover:scale-[1.05] transition-all shadow-sm border border-slate-200"><img src="https://picsum.photos/seed/event/300/200" class="w-full h-full object-cover"><div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-3 flex flex-col justify-end text-white"><span class="text-xs font-bold">事件库</span><span class="text-[10px] opacity-80">+15 | 1h前</span></div></div>
+                <div class="shrink-0 w-40 h-28 rounded-lg overflow-hidden relative cursor-pointer hover:scale-[1.05] transition-all shadow-sm border border-slate-200"><img src="https://picsum.photos/seed/tech/300/200" class="w-full h-full object-cover"><div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-3 flex flex-col justify-end text-white"><span class="text-xs font-bold">专题库</span><span class="text-[10px] opacity-80">+5 | 本周</span></div></div>
+                <div class="shrink-0 w-40 h-28 rounded-lg overflow-hidden relative cursor-pointer hover:scale-[1.05] transition-all shadow-sm border border-slate-200"><img src="https://picsum.photos/seed/report/300/200" class="w-full h-full object-cover"><div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-3 flex flex-col justify-end text-white"><span class="text-xs font-bold">专家报告</span><span class="text-[10px] opacity-80">+2 | 昨天</span></div></div>
+            </div>
+            <button onclick="scrollNav('nav-scroll', 240)" class="absolute -right-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 bg-white border border-slate-200 rounded-full shadow-md flex items-center justify-center text-slate-600 hover:text-blue-900 transition-all opacity-0 group-hover:opacity-100">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+        </section>
+
+        <!-- ========= 1. AI 实时态势推演 ========= -->
+        <section class="mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-bold flex items-center gap-2 text-slate-800"><i class="fa-solid fa-crosshairs text-primary-500"></i> AI 实时态势推演</h2>
+                <div class="flex items-center gap-3"><span class="text-xs text-slate-500 font-mono font-medium">LIVE FEED <span class="text-rose-500 animate-pulse">●</span></span><span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-rose-50 text-rose-600 border border-rose-200">DEFCON 3 级关注</span></div>
+            </div>
+            <div class="flex flex-col lg:flex-row gap-6">
+                <div class="flex-1 min-w-0"><div id="ai-carousel-container" class="rounded-xl overflow-hidden relative h-[360px] group shadow-md border border-slate-200"><div id="carousel-slides" class="w-full h-full relative"><div class="carousel-slide absolute inset-0 transition-opacity duration-700 opacity-100 z-20"><div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent z-10"></div><img src="https://images.unsplash.com/photo-1517976487492-5750f3195933?auto=format&fit=crop&w=1200&q=80" class="w-full h-full object-cover"><div class="absolute bottom-0 left-0 p-6 z-30 w-full"><div class="flex items-center gap-3 mb-2"><span class="px-2 py-0.5 bg-rose-600 text-white text-[10px] font-bold rounded shadow-sm">P1 异常预警</span><span class="text-primary-300 text-xs font-mono"><i class="fa-solid fa-satellite"></i> X-5 试验场影像</span></div><h3 class="text-2xl font-bold text-white mb-3 tracking-wide">高超音速风洞设施疑似扩建</h3><div class="bg-slate-900/80 border-l-2 border-primary-500 p-3 max-w-2xl backdrop-blur-sm rounded-r-lg shadow-lg"><p class="text-sm text-primary-50 font-mono ai-typing">> AI 视觉模型比对: 建筑活动频率超出基准线 340%，推测正进行实物级地面试验。</p></div></div></div><div class="carousel-slide absolute inset-0 transition-opacity duration-700 opacity-0 z-10"><div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent z-10"></div><img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80" class="w-full h-full object-cover"><div class="absolute bottom-0 left-0 p-6 z-30 w-full"><div class="flex items-center gap-3 mb-2"><span class="px-2 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded shadow-sm">P2 动态追踪</span><span class="text-primary-300 text-xs font-mono"><i class="fa-solid fa-satellite-dish"></i> LEO 轨道监控</span></div><h3 class="text-2xl font-bold text-white mb-3 tracking-wide">某国侦察卫星执行异常变轨机动</h3><div class="bg-slate-900/80 border-l-2 border-amber-500 p-3 max-w-2xl backdrop-blur-sm rounded-r-lg shadow-lg"><p class="text-sm text-primary-50 font-mono ai-typing">> 轨道动力学模型: 目标卫星近地点降低 15km，疑似针对我方演习区域进行抵近侦察。</p></div></div></div><div class="carousel-slide absolute inset-0 transition-opacity duration-700 opacity-0 z-10"><div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent z-10"></div><img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=1200&q=80" class="w-full h-full object-cover"><div class="absolute bottom-0 left-0 p-6 z-30 w-full"><div class="flex items-center gap-3 mb-2"><span class="px-2 py-0.5 bg-primary-600 text-white text-[10px] font-bold rounded shadow-sm">P3 战略趋势</span><span class="text-primary-300 text-xs font-mono"><i class="fa-solid fa-microchip"></i> 量子计算领域</span></div><h3 class="text-2xl font-bold text-white mb-3 tracking-wide">抗量子密码体系 (PQC) 标准化加速</h3><div class="bg-slate-900/80 border-l-2 border-primary-500 p-3 max-w-2xl backdrop-blur-sm rounded-r-lg shadow-lg"><p class="text-sm text-primary-50 font-mono ai-typing">> NLP 预测网络: 关联核心智库报告激增，传统通信链路面临长效破译风险。</p></div></div></div></div><div class="absolute top-4 right-4 z-40 flex gap-2"><button onclick="switchSlide(0)" class="carousel-btn active px-3 py-1 bg-white/90 backdrop-blur border border-primary-500 text-primary-600 text-xs font-mono font-bold rounded shadow-sm transition-all">SEQ 01</button><button onclick="switchSlide(1)" class="carousel-btn px-3 py-1 bg-white/60 backdrop-blur border border-transparent text-slate-600 hover:bg-white/90 hover:text-primary-600 text-xs font-mono font-bold rounded transition-all">SEQ 02</button><button onclick="switchSlide(2)" class="carousel-btn px-3 py-1 bg-white/60 backdrop-blur border border-transparent text-slate-600 hover:bg-white/90 hover:text-primary-600 text-xs font-mono font-bold rounded transition-all">SEQ 03</button></div></div></div>
+                <div class="lg:w-80 xl:w-96 flex-shrink-0"><div class="light-panel rounded-xl p-5 flex flex-col h-[360px] transition-all"><div class="flex items-center justify-between mb-3"><h3 class="text-sm font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-chart-simple text-amber-500"></i> 更多态势推演<span class="text-[10px] text-slate-400 font-mono">实时研判摘要</span></h3><span class="text-[10px] text-primary-500 bg-primary-50 px-2 py-0.5 rounded-full">AI 持续更新</span></div><div class="flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-thin"><div class="p-3 bg-slate-50 rounded-lg border-l-4 border-l-primary-500 border border-slate-200 hover:shadow-sm transition-all cursor-pointer"><div class="flex justify-between items-start"><span class="text-[10px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded">高置信预警</span><span class="text-[9px] text-slate-400">8m前</span></div><h4 class="text-sm font-bold text-slate-800 mt-1">西北试验场高频雷达信号异常</h4><p class="text-xs text-slate-500 mt-1 line-clamp-2">频谱特征匹配某型有源相控阵雷达测试，推测新型火控系统进入实装验证阶段。</p><div class="mt-2 flex items-center gap-2 text-[10px] text-primary-600"><i class="fa-regular fa-clock"></i> 关联6份情报</div></div><div class="p-3 bg-slate-50 rounded-lg border-l-4 border-l-amber-500 border border-slate-200 hover:shadow-sm transition-all cursor-pointer"><div class="flex justify-between items-start"><span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded">战略动态</span><span class="text-[9px] text-slate-400">23m前</span></div><h4 class="text-sm font-bold text-slate-800 mt-1">可重复使用火箭发动机试车成功</h4><p class="text-xs text-slate-500 mt-1 line-clamp-2">液氧甲烷发动机完成200秒长程试车，复用次数突破10次门槛，商业发射成本预期下降。</p><div class="mt-2 flex items-center gap-2 text-[10px] text-amber-600"><i class="fa-regular fa-newspaper"></i> 资讯热度 +234%</div></div><div class="p-3 bg-slate-50 rounded-lg border-l-4 border-l-emerald-500 border border-slate-200 hover:shadow-sm transition-all cursor-pointer"><div class="flex justify-between items-start"><span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">技术突破</span><span class="text-[9px] text-slate-400">1h前</span></div><h4 class="text-sm font-bold text-slate-800 mt-1">航空发动机高温合金单晶叶片新工艺</h4><p class="text-xs text-slate-500 mt-1 line-clamp-2">定向凝固技术效率提升30%，耐温能力突破1200℃，或将加速下一代涡扇列装。</p><div class="mt-2 flex items-center gap-2 text-[10px] text-emerald-600"><i class="fa-regular fa-file-lines"></i> 专利公开号CN2026XXXX</div></div><div class="p-3 bg-slate-50 rounded-lg border-l-4 border-l-sky-500 border border-slate-200 hover:shadow-sm transition-all cursor-pointer"><div class="flex justify-between items-start"><span class="text-[10px] font-bold text-sky-600 bg-sky-50 px-2 py-0.5 rounded">卫星追踪</span><span class="text-[9px] text-slate-400">2h前</span></div><h4 class="text-sm font-bold text-slate-800 mt-1">低轨星座新增批量化部署计划</h4><p class="text-xs text-slate-500 mt-1 line-clamp-2">某厂商宣布月均发射200颗宽带卫星，空间频谱资源争夺白热化。</p><div class="mt-2 flex items-center gap-2 text-[10px] text-sky-600"><i class="fa-solid fa-satellite"></i> 关联发射日程</div></div></div><button class="w-full mt-3 py-1.5 text-xs font-semibold text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-lg border border-primary-100 transition-colors">查看完整推演序列 <i class="fa-solid fa-arrow-right ml-1"></i></button></div></div>
+            </div>
+        </section>
+
+        <!-- ========= 2. 动态焦点 + 实时入库脉动 ========= -->
+        <section class="mb-8">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <div class="lg:w-[60%] xl:w-[60%]"><div class="flex items-center justify-between mb-4"><div class="flex items-center gap-2"><i class="fa-solid fa-fire-flame-curved text-orange-500 text-lg"></i><h2 class="text-lg font-bold text-slate-800">动态焦点 · 实时热度榜</h2><span class="bg-rose-50 text-rose-600 text-[10px] font-bold px-2 py-0.5 rounded-full border border-rose-200">AI 声量加权</span></div><div class="flex items-center gap-2 text-[11px] text-slate-400"><i class="fa-regular fa-clock"></i><span id="focus-timer">热度数据每15s动态刷新</span></div></div><div class="light-panel rounded-xl p-5 transition-all"><div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="hot-focus-grid"></div><div class="mt-4 pt-2 border-t border-dashed border-slate-200 flex justify-between items-center"><span class="text-[11px] text-slate-400"><i class="fa-regular fa-message"></i> 基于2.3w+条智库讨论、专利聚类的实时热度模型</span><span class="text-[10px] bg-slate-100 px-2 py-1 rounded-full text-primary-600 font-mono"><i class="fa-regular fa-bell"></i> 热点实时更新</span></div></div></div>
+                <div class="lg:w-[40%] xl:w-[40%]"><div class="light-panel rounded-xl p-5 flex flex-col h-full min-h-[380px] transition-all"><h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center justify-between"><span><i class="fa-solid fa-circle-nodes text-emerald-500 mr-2"></i> 实时入库脉动</span><span class="text-[10px] text-slate-400 uppercase font-mono">Real-time Stream</span></h3><div id="live-stream" class="space-y-3 flex-1 overflow-y-auto pr-1 scrollbar-thin"><div class="flex gap-3 text-xs border-l-2 border-emerald-500 pl-3 py-1"><span class="font-mono text-slate-400 shrink-0">12s前</span><div><span class="font-bold text-emerald-700">【资讯库】</span><span class="text-slate-600">检测到《2026航空发动机峰会》最新议程发布</span></div></div><div class="flex gap-3 text-xs border-l-2 border-blue-500 pl-3 py-1"><span class="font-mono text-slate-400 shrink-0">2m前</span><div><span class="font-bold text-blue-700">【装备库】</span><span class="text-slate-600">更新“歼-XX”型机载火控雷达参数配置</span></div></div><div class="flex gap-3 text-xs border-l-2 border-amber-500 pl-3 py-1"><span class="font-mono text-slate-400 shrink-0">5m前</span><div><span class="font-bold text-amber-700">【专利库】</span><span class="text-slate-600">新增关于“高超音速飞行器变体结构”授权专利</span></div></div></div><div class="mt-3 text-center text-[10px] text-primary-400 font-mono border-t border-slate-100 pt-2"><i class="fa-regular fa-eye"></i> 实时数据摄取中</div></div></div>
+            </div>
+        </section>
+
+        <!-- ========= 3. 全域态势与图谱关联 ========= -->
+        <section class="mt-2 space-y-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-3"><div class="flex items-center gap-3"><h2 class="text-lg font-bold flex items-center gap-2 text-slate-800"><i class="fa-solid fa-network-wired text-primary-500"></i> 全域态势与图谱关联</h2><div class="hidden sm:flex bg-slate-100 rounded-md p-1 border border-slate-200"><button class="px-4 py-1.5 rounded bg-white text-primary-600 text-xs font-bold shadow-sm">全域聚合</button><button class="px-4 py-1.5 rounded text-slate-500 hover:text-slate-800 text-xs font-medium transition-all">高危异常</button><button class="px-4 py-1.5 rounded text-slate-500 hover:text-slate-800 text-xs font-medium transition-all">技术突破</button><button class="px-4 py-1.5 rounded text-slate-500 hover:text-slate-800 text-xs font-medium transition-all">供应链穿透</button></div></div><div class="flex items-center gap-2"><span class="text-xs text-slate-500 font-medium"><i class="fa-solid fa-filter"></i> 智能降噪已开启</span><div class="w-8 h-4 bg-primary-100 rounded-full relative cursor-pointer border border-primary-200"><div class="absolute right-0.5 top-0.5 w-3 h-3 bg-primary-500 rounded-full shadow-sm"></div></div></div></div>
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6"><div class="xl:col-span-2 space-y-4"><div class="light-panel rounded-xl p-5 relative group border-l-4 border-l-rose-500 hover:border-primary-300 transition-all duration-300 hover:shadow-md bg-white"><div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 z-10"><button class="w-8 h-8 rounded-full bg-slate-100 hover:bg-primary-500 text-slate-500 hover:text-white flex items-center justify-center transition-colors shadow-sm"><i class="fa-solid fa-plus text-xs"></i></button></div><div class="flex items-center gap-3 mb-3"><span class="px-2 py-0.5 bg-rose-50 border border-rose-200 text-rose-500 rounded text-[10px] font-bold"><i class="fa-solid fa-triangle-exclamation mr-1"></i> AI 异常预警</span><span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px] font-medium border border-slate-200">Sentinel-2 光学影像</span><span class="text-[10px] text-slate-400 ml-auto font-mono font-medium">15 分钟前截获</span></div><h3 class="text-base font-bold text-slate-900 mb-2 pr-12 group-hover:text-primary-600 transition-colors">某国 X-5 试验场区域疑似开展超音速风洞扩建工程</h3><div class="my-3 p-3 bg-rose-50 border border-rose-100 rounded-lg"><p class="text-xs text-rose-600 leading-relaxed font-mono"><i class="fa-solid fa-robot mr-1"></i> [AI 视觉时序检测]：目标区域 (Lat: 34.xx, Lon: 118.xx) 近 30 天新增建筑活动激增，活动频率超出历史基线 340%。热力学特征匹配高超音速测试设施。建议立即提升监控等级。</p></div><div class="flex items-center justify-between mt-4"><div class="flex gap-2"><span class="text-xs text-slate-600 bg-white px-2 py-1 rounded-md border border-slate-200 hover:border-primary-400 hover:text-primary-600 cursor-pointer transition-colors shadow-sm"><i class="fa-regular fa-folder-open text-primary-500 mr-1"></i> X-5 试验场</span><span class="text-xs text-slate-600 bg-white px-2 py-1 rounded-md border border-slate-200 hover:border-primary-400 hover:text-primary-600 cursor-pointer transition-colors shadow-sm"><i class="fa-solid fa-satellite text-primary-500 mr-1"></i> 轨道影像分析</span></div><div class="flex items-center gap-2"><span class="text-[10px] text-slate-500 font-medium">研判置信度</span><div class="w-16 h-1.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full bg-rose-500 rounded-full w-[87%]"></div></div><span class="text-rose-500 text-xs font-bold font-mono">87%</span></div></div></div><div class="light-panel rounded-xl p-5 relative group border-l-4 border-l-amber-500 hover:border-primary-300 transition-all duration-300 hover:shadow-md bg-white"><div class="flex items-center gap-3 mb-3"><span class="px-2 py-0.5 bg-amber-50 border border-amber-200 text-amber-600 rounded text-[10px] font-bold"><i class="fa-solid fa-lightbulb mr-1"></i> 隐含关联发现</span><span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px] font-medium border border-slate-200">USPTO 专利库</span><span class="text-[10px] text-slate-400 ml-auto font-mono font-medium">4 小时前</span></div><h3 class="text-base font-bold text-slate-900 mb-2 group-hover:text-primary-600 transition-colors">新型耐高温陶瓷基复合材料 (CMC) 制备工艺专利公布</h3><p class="text-xs text-slate-600 mb-3 line-clamp-2 leading-relaxed">某国航空研究院提交了一项关于碳化硅纤维增韧陶瓷基复合材料的新专利，声称可将防热结构耐受温度提升至 2200°C 以上，主要应用于高超音速滑翔体 (HGV) 的前缘部件。</p><div class="flex items-center gap-2 text-[10px] font-mono text-primary-700 bg-primary-50 p-2 rounded-lg border border-primary-100"><i class="fa-solid fa-diagram-project"></i><span class="font-semibold">当前专利</span><i class="fa-solid fa-arrow-right-long text-slate-400"></i><span class="text-slate-600">发明人: J.Doe (历史关联: 某军工项目)</span><i class="fa-solid fa-arrow-right-long text-slate-400"></i><span class="text-amber-500 font-bold">高超音速武器热防护节点命中</span></div></div></div><div class="xl:col-span-1"><div class="light-panel rounded-xl p-0 overflow-hidden h-full min-h-[400px] flex flex-col relative bg-white"><div class="p-4 border-b border-slate-100 bg-white/90 backdrop-blur absolute top-0 w-full z-20 shadow-sm"><h3 class="text-sm font-bold text-slate-800 flex items-center justify-between"><span><i class="fa-solid fa-radar mr-2 text-primary-500"></i> 核心关联图谱雷达</span><button class="text-[10px] font-semibold text-primary-600 hover:text-primary-700 bg-primary-50 px-2 py-1 rounded"><i class="fa-solid fa-expand"></i> 全屏研判</button></h3></div><div class="flex-1 bg-slate-50/50 relative overflow-hidden flex items-center justify-center mt-12"><div class="absolute inset-0 bg-[linear-gradient(rgba(148,163,184,0.15)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.15)_1px,transparent_1px)] bg-[size:20px_20px]"></div><div class="absolute w-64 h-64 border border-primary-300 rounded-full animate-ping opacity-30"></div><div class="absolute w-48 h-48 border border-primary-200 rounded-full"></div><svg class="absolute inset-0 w-full h-full" style="z-index: 5;"><line x1="50%" y1="50%" x2="20%" y2="30%" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4" /><line x1="50%" y1="50%" x2="80%" y2="40%" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4" /><line x1="50%" y1="50%" x2="60%" y2="80%" stroke="#f43f5e" stroke-width="2" class="opacity-80 animate-pulse" /></svg><div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex flex-col items-center"><div class="w-12 h-12 bg-white border-2 border-primary-500 rounded-full shadow-[0_0_15px_rgba(96,92,229,0.3)] flex items-center justify-center relative cursor-pointer z-10"><i class="fa-solid fa-rocket text-primary-500 text-lg"></i><div class="absolute inset-0 rounded-full border border-primary-400 animate-ping opacity-50"></div></div><span class="mt-2 text-[10px] font-bold text-slate-700 bg-white px-2 py-0.5 rounded shadow-sm border border-slate-200">高超音速项目 Alpha</span></div><div class="absolute top-[20%] left-[10%] z-10 flex flex-col items-center group cursor-pointer"><div class="w-8 h-8 bg-white border border-slate-300 rounded-full flex items-center justify-center group-hover:border-primary-500 group-hover:shadow-md transition-all shadow-sm"><i class="fa-solid fa-microchip text-slate-500 group-hover:text-primary-500 text-xs"></i></div><span class="mt-1 text-[10px] font-medium text-slate-600 group-hover:text-primary-600">陶瓷基复合材料</span></div><div class="absolute top-[70%] left-[55%] z-10 flex flex-col items-center cursor-pointer"><div class="w-10 h-10 bg-white border-2 border-rose-500 rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(244,63,94,0.3)]"><i class="fa-solid fa-satellite text-rose-500 text-sm"></i></div><span class="mt-1 text-[10px] font-bold text-rose-600 bg-rose-50 border border-rose-100 px-1.5 py-0.5 rounded">X-5 异常扩建</span></div><div class="absolute bottom-4 left-4 right-4 bg-white border border-slate-200 rounded-lg p-3 z-30 shadow-lg"><h4 class="text-xs font-bold text-primary-600 mb-1"><i class="fa-solid fa-circle-nodes"></i> 图谱动态解析</h4><p class="text-[10px] text-slate-600 leading-relaxed font-medium">AI 发现新增 1 个高危异常节点（X-5 试验场），并已成功将其与 [高超音速项目 Alpha] 及上游 [CMC 材料专利] 建立知识链路。</p></div></div></div></div></div>
+        </section>
+
+        <!-- ========= 4. 智库推荐 (左右结构: 左侧轮播 + 右侧2x2网格) ========= -->
+        <section class="mt-8 pt-4 border-t border-slate-200">
+            <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-brain text-primary-500 text-xl"></i>
+                    <h2 class="text-lg font-bold text-slate-800">智库推荐 · 基于您的研究画像</h2>
+                    <span class="bg-primary-50 text-primary-600 text-[10px] font-bold px-2 py-0.5 rounded-full border border-primary-200">个性化引擎</span>
+                </div>
+                <div class="text-xs text-slate-400 flex items-center gap-2"><i class="fa-regular fa-circle-check text-emerald-500"></i> 根据近期检索“高超音速/CMC/低轨星座”动态更新</div>
+            </div>
+            <div class="flex flex-col lg:flex-row gap-6">
+                <!-- 左侧轮播区域 (精选推荐) -->
+                <div class="lg:w-1/2 xl:w-1/2">
+                    <div class="rounded-xl overflow-hidden relative h-80 group shadow-md border border-slate-200 bg-white" id="recommend-carousel-container">
+                        <div id="rec-carousel-slides" class="w-full h-full relative">
+                            <div class="rec-slide absolute inset-0 transition-opacity duration-700 opacity-100 z-20"><div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-transparent z-10"></div><img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1200&q=80" class="w-full h-full object-cover"><div class="absolute bottom-0 left-0 p-6 z-30 w-full"><div class="flex items-center gap-2 mb-2"><span class="px-2 py-0.5 bg-blue-600 text-white text-[10px] font-bold rounded shadow-sm">专家报告</span><span class="text-white/80 text-xs font-mono">CSIS · 昨天更新</span></div><h3 class="text-xl font-bold text-white mb-2">2026全球高超音速武器工业基础评估</h3><p class="text-sm text-white/90 line-clamp-2">全面分析供应链韧性、试验设施扩建及材料瓶颈，引用32份一手信源。</p><div class="mt-3 flex gap-3"><span class="text-xs text-white/70"><i class="fa-regular fa-file-pdf"></i> PDF 42页</span><span class="text-xs text-white/70"><i class="fa-regular fa-clock"></i> 基于您订阅“高超音速”专题</span></div></div></div>
+                            <div class="rec-slide absolute inset-0 transition-opacity duration-700 opacity-0 z-10"><div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-transparent z-10"></div><img src="https://images.unsplash.com/photo-1581092162384-8987c4d2d6f8?auto=format&fit=crop&w=1200&q=80" class="w-full h-full object-cover"><div class="absolute bottom-0 left-0 p-6 z-30 w-full"><div class="flex items-center gap-2 mb-2"><span class="px-2 py-0.5 bg-purple-600 text-white text-[10px] font-bold rounded shadow-sm">深度专题</span><span class="text-white/80 text-xs font-mono">热度飙升 +87%</span></div><h3 class="text-xl font-bold text-white mb-2">陶瓷基复合材料(CMC)工业化瓶颈与破局</h3><p class="text-sm text-white/90 line-clamp-2">涵盖美、日、欧最新专利布局，技术壁垒及低成本制备路线。</p><div class="mt-3 flex gap-3"><span class="text-xs text-white/70"><i class="fa-regular fa-chart-line"></i> 关联您近期浏览的3项专利</span></div></div></div>
+                            <div class="rec-slide absolute inset-0 transition-opacity duration-700 opacity-0 z-10"><div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-transparent z-10"></div><img src="https://images.unsplash.com/photo-1541185933596-2b3d09f3cc9b?auto=format&fit=crop&w=1200&q=80" class="w-full h-full object-cover"><div class="absolute bottom-0 left-0 p-6 z-30 w-full"><div class="flex items-center gap-2 mb-2"><span class="px-2 py-0.5 bg-emerald-600 text-white text-[10px] font-bold rounded shadow-sm">武器数据库</span><span class="text-white/80 text-xs font-mono">实时对比</span></div><h3 class="text-xl font-bold text-white mb-2">高超音速滑翔飞行器(HGV)性能参数对比</h3><p class="text-sm text-white/90 line-clamp-2">含助推滑翔/吸气式型号，射程、速度、CEP指标及技术代际演进。</p><div class="mt-3 flex gap-3"><span class="text-xs text-white/70"><i class="fa-regular fa-building"></i> 适配您关注的X-5试验场</span></div></div></div>
+                            <div class="rec-slide absolute inset-0 transition-opacity duration-700 opacity-0 z-10"><div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-transparent z-10"></div><img src="https://images.unsplash.com/photo-1517976487492-5750f3195933?auto=format&fit=crop&w=1200&q=80" class="w-full h-full object-cover"><div class="absolute bottom-0 left-0 p-6 z-30 w-full"><div class="flex items-center gap-2 mb-2"><span class="px-2 py-0.5 bg-sky-600 text-white text-[10px] font-bold rounded shadow-sm">遥感数据</span><span class="text-white/80 text-xs font-mono">SAR+光学</span></div><h3 class="text-xl font-bold text-white mb-2">某国西部试验场高频次卫星时序分析</h3><p class="text-sm text-white/90 line-clamp-2">近90天高分影像变化检测，识别新建风洞/发射台基建异常。</p><div class="mt-3 flex gap-3"><span class="text-xs text-white/70"><i class="fa-regular fa-image"></i> 基于您的地域监控偏好</span></div></div></div>
+                        </div>
+                        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-40 flex gap-2">
+                            <button onclick="switchRecSlide(0)" class="rec-carousel-btn w-5 h-2 rounded-full bg-white shadow-sm transition-all active-rec-btn"></button>
+                            <button onclick="switchRecSlide(1)" class="rec-carousel-btn w-2 h-2 rounded-full bg-white/40 hover:bg-white/80 transition-all"></button>
+                            <button onclick="switchRecSlide(2)" class="rec-carousel-btn w-2 h-2 rounded-full bg-white/40 hover:bg-white/80 transition-all"></button>
+                            <button onclick="switchRecSlide(3)" class="rec-carousel-btn w-2 h-2 rounded-full bg-white/40 hover:bg-white/80 transition-all"></button>
+                        </div>
+                    </div>
+                </div>
+                <!-- 右侧 2x2 网格推荐 -->
+                <div class="lg:w-1/2 xl:w-1/2">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 h-full">
+                        <div class="light-panel rounded-xl overflow-hidden hover:shadow-lg transition-all rec-card cursor-pointer flex flex-col p-4 border border-slate-200 hover:border-primary-300"><div class="flex items-center gap-2 mb-2"><span class="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-0.5 rounded">专家报告</span><span class="text-[10px] text-slate-400">兰德公司</span></div><h3 class="font-bold text-slate-800 text-sm mb-1">低轨巨型星座频谱竞争与反制手段</h3><p class="text-xs text-slate-500 line-clamp-2 flex-1">评估2030年前频谱拥塞风险及新型干扰/抗干扰技术。</p><div class="mt-3 flex items-center gap-2 text-[10px] text-primary-500"><i class="fa-regular fa-bell"></i> 您订阅的“太空安全”领域</div></div>
+                        <div class="light-panel rounded-xl overflow-hidden hover:shadow-lg transition-all rec-card cursor-pointer flex flex-col p-4 border border-slate-200 hover:border-primary-300"><div class="flex items-center gap-2 mb-2"><span class="text-[10px] font-bold bg-rose-50 text-rose-600 px-2 py-0.5 rounded">前沿技术</span><span class="text-[10px] text-slate-400">变循环发动机</span></div><h3 class="font-bold text-slate-800 text-sm mb-1">自适应变循环发动机技术成熟度演进</h3><p class="text-xs text-slate-500 line-clamp-2 flex-1">XA100/GENx 衍生型号对比，第六代动力系统关键路径。</p><div class="mt-3 flex items-center gap-2 text-[10px] text-primary-500"><i class="fa-regular fa-newspaper"></i> 与您的订阅主题匹配</div></div>
+                        <div class="light-panel rounded-xl overflow-hidden hover:shadow-lg transition-all rec-card cursor-pointer flex flex-col p-4 border border-slate-200 hover:border-primary-300"><div class="flex items-center gap-2 mb-2"><span class="text-[10px] font-bold bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded">武器数据库</span><span class="text-[10px] text-slate-400">更新于2h前</span></div><h3 class="font-bold text-slate-800 text-sm mb-1">全球现役/在研高超音速武器名录</h3><p class="text-xs text-slate-500 line-clamp-2 flex-1">涵盖俄罗斯“锆石”、美国ARRW、中国DF-17等型号技术参数及部署状态。</p><div class="mt-3 flex items-center gap-2 text-[10px] text-primary-500"><i class="fa-solid fa-chart-simple"></i> 基于您的对比需求</div></div>
+                        <div class="light-panel rounded-xl overflow-hidden hover:shadow-lg transition-all rec-card cursor-pointer flex flex-col p-4 border border-slate-200 hover:border-primary-300"><div class="flex items-center gap-2 mb-2"><span class="text-[10px] font-bold bg-sky-50 text-sky-600 px-2 py-0.5 rounded">遥感数据</span><span class="text-[10px] text-slate-400">热力图</span></div><h3 class="font-bold text-slate-800 text-sm mb-1">高超音速试验场全球热力图谱</h3><p class="text-xs text-slate-500 line-clamp-2 flex-1">整合近半年卫星红外/光学数据，标注高频测试节点及设施扩建区域。</p><div class="mt-3 flex items-center gap-2 text-[10px] text-primary-500"><i class="fa-regular fa-map"></i> 您关注的X-5区域已高亮</div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-5 text-right"><button class="text-xs text-primary-600 hover:text-primary-700 font-medium bg-primary-50 px-4 py-2 rounded-full transition-all shadow-sm">查看全部推荐 <i class="fa-solid fa-arrow-right ml-1"></i></button></div>
+        </section>
+
+        <!-- ========= 5. 全源情报专属推荐 (三列卡片瀑布流) ========= -->
+        <section class="border-t border-slate-200 pt-8 mt-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-lg font-bold flex items-center gap-2 text-slate-800"><i class="fa-solid fa-layer-group text-primary-500"></i> 全源情报专属推荐</h2>
+                <div class="flex gap-2"><button class="px-3 py-1 text-xs font-semibold bg-primary-50 text-primary-600 rounded">猜你喜欢</button><button class="px-3 py-1 text-xs font-medium text-slate-500 hover:bg-slate-100 rounded">最新发布</button></div>
+            </div>
+            <!-- 三列卡片瀑布流，动态内容丰富 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="all-source-grid">
+                <!-- 卡片将通过js动态渲染，保证内容多样 -->
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // 主轮播图逻辑
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.carousel-slide');
+        const btns = document.querySelectorAll('.carousel-btn');
+        const totalSlides = slides.length;
+        let autoPlayInterval;
+        function switchSlide(index) { slides.forEach((s,i)=>{s.classList.remove('opacity-100','z-20');s.classList.add('opacity-0','z-10');const te=s.querySelector('.ai-typing');if(te){te.style.animation='none';te.offsetHeight;te.style.animation=null;}});btns.forEach(b=>{b.classList.remove('bg-white/90','border-primary-500','text-primary-600','shadow-sm','active');b.classList.add('bg-white/60','border-transparent','text-slate-600');});slides[index].classList.remove('opacity-0','z-10');slides[index].classList.add('opacity-100','z-20');btns[index].classList.remove('bg-white/60','border-transparent','text-slate-600');btns[index].classList.add('bg-white/90','border-primary-500','text-primary-600','shadow-sm','active');currentSlide=index;}
+        function nextSlide(){let next=(currentSlide+1)%totalSlides;switchSlide(next);}
+        function startAutoPlay(){autoPlayInterval=setInterval(nextSlide,6000);}
+        startAutoPlay();const container=document.getElementById('ai-carousel-container');if(container){container.addEventListener('mouseenter',()=>clearInterval(autoPlayInterval));container.addEventListener('mouseleave',startAutoPlay);}
+        function scrollNav(elementId,distance){document.getElementById(elementId).scrollBy({left:distance,behavior:'smooth'});}
+        
+        // 智库推荐轮播逻辑
+        let currentRecSlide = 0;
+        const recSlides = document.querySelectorAll('.rec-slide');
+        const recBtns = document.querySelectorAll('.rec-carousel-btn');
+        const totalRecSlides = recSlides.length;
+        let recAutoInterval;
+        function switchRecSlide(index) {
+            recSlides.forEach((s, i) => { s.classList.remove('opacity-100', 'z-20'); s.classList.add('opacity-0', 'z-10'); });
+            recBtns.forEach(btn => { btn.classList.remove('w-5', 'bg-white'); btn.classList.add('w-2', 'bg-white/40'); });
+            recSlides[index].classList.remove('opacity-0', 'z-10'); recSlides[index].classList.add('opacity-100', 'z-20');
+            recBtns[index].classList.remove('w-2', 'bg-white/40'); recBtns[index].classList.add('w-5', 'bg-white');
+            currentRecSlide = index;
+        }
+        function nextRecSlide() { let next = (currentRecSlide + 1) % totalRecSlides; switchRecSlide(next); }
+        function startRecAutoPlay() { if(recAutoInterval) clearInterval(recAutoInterval); recAutoInterval = setInterval(nextRecSlide, 5000); }
+        startRecAutoPlay();
+        const recContainer = document.getElementById('recommend-carousel-container');
+        if(recContainer) { recContainer.addEventListener('mouseenter', () => clearInterval(recAutoInterval)); recContainer.addEventListener('mouseleave', startRecAutoPlay); }
+        
+        // 入库更新
+        function addNewUpdate(type, title, color) {
+            const stream = document.getElementById('live-stream');
+            if(!stream) return;
+            const newEntry = document.createElement('div');
+            newEntry.className = 'flex gap-3 text-xs border-l-2 pl-3 py-1';
+            newEntry.style.borderColor = color;
+            newEntry.innerHTML = `<span class="font-mono text-slate-400 shrink-0">刚刚</span><div><span class="font-bold" style="color:${color}">【${type}】</span><span class="text-slate-600">${title}</span></div>`;
+            stream.prepend(newEntry);
+            if(stream.children.length > 5) stream.removeChild(stream.lastChild);
+        }
+        setInterval(()=>{ addNewUpdate('事件库','监控到卫星发射基地频率异常波动','#f43f5e'); }, 10000);
+        
+        // 动态焦点数据
+        const focusData = [
+            { type: '事件', icon: 'fa-globe', title: 'X-5 高超音速风洞扩建工程', heat: 98, trend: '+32%', desc: '卫星影像确认地基施工范围扩大', tag: '异常预警', img: 'https://images.unsplash.com/photo-1569428034239-f9565c32f3aa?w=100&h=100&fit=crop' },
+            { type: '人物', icon: 'fa-user-astronaut', title: '林奇·卡特博士 (CMC材料首席)', heat: 94, trend: '+27%', desc: '连续主导三项耐热复合材料专利', tag: '技术先锋', img: 'https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?w=100&h=100&fit=crop' },
+            { type: '技术', icon: 'fa-microchip', title: '陶瓷基复合材料耐温突破2200°C', heat: 91, trend: '+45%', desc: '热防护领域颠覆性进展', tag: '专利热点', img: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=100&h=100&fit=crop' },
+            { type: '事件', icon: 'fa-rocket', title: '可重复使用空天飞行器轨道测试', heat: 87, trend: '+18%', desc: '低成本快速响应能力验证', tag: '战略动态', img: 'https://images.unsplash.com/photo-1541185933596-2b3d09f3cc9b?w=100&h=100&fit=crop' },
+            { type: '人物', icon: 'fa-chalkboard-user', title: '空天动力研究院首席科学家张维', heat: 82, trend: '+21%', desc: '变循环发动机会议主旨演讲', tag: '重磅观点', img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&h=100&fit=crop' },
+            { type: '技术', icon: 'fa-satellite-dish', title: '低轨巨型星座频谱博弈激化', heat: 79, trend: '+39%', desc: 'ITU申报文件数量井喷', tag: '供应链风险', img: 'https://images.unsplash.com/photo-1517976487492-5750f3195933?w=100&h=100&fit=crop' }
+        ];
+        function renderFocusList() {
+            const grid = document.getElementById('hot-focus-grid');
+            if (!grid) return;
+            grid.innerHTML = focusData.map(item => `<div class="focus-card bg-white border border-slate-200 rounded-xl p-3 shadow-sm transition-all cursor-pointer group hover:border-primary-300 hover:shadow-md"><div class="flex gap-3"><div class="shrink-0 w-12 h-12 rounded-lg overflow-hidden border border-slate-200 bg-slate-50"><img src="${item.img}" class="focus-card-img w-full h-full object-cover" onerror="this.src='https://picsum.photos/id/20/100/100'"></div><div class="flex-1 min-w-0"><div class="flex justify-between items-start"><div class="flex items-center gap-2 flex-wrap"><i class="fa-solid ${item.icon} text-primary-500 text-xs"></i><span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">${item.type}</span><span class="text-[9px] font-mono text-rose-500 bg-rose-50 px-1.5 rounded">${item.tag}</span></div><div class="flex items-center gap-1 text-orange-500"><i class="fa-solid fa-fire-flame-curved text-xs"></i><span class="text-xs font-black">${item.heat}</span><span class="text-emerald-600 text-[10px] font-bold">${item.trend}</span></div></div><h4 class="font-bold text-slate-800 text-sm mt-1 mb-0.5 group-hover:text-primary-600 truncate">${item.title}</h4><p class="text-xs text-slate-500 truncate">${item.desc}</p><div class="mt-2 w-full bg-slate-100 rounded-full h-1.5 overflow-hidden"><div class="heat-bar h-full rounded-full" style="width: ${item.heat}%;"></div></div></div></div></div>`).join('');
+        }
+        let intervalDynamic = null;
+        function startDynamicHeat() {
+            if(intervalDynamic) clearInterval(intervalDynamic);
+            intervalDynamic = setInterval(() => {
+                focusData.forEach(item => { let delta = (Math.random() - 0.5) * 8; let newHeat = item.heat + delta; newHeat = Math.min(99, Math.max(45, newHeat)); item.heat = Math.floor(newHeat); let trendDelta = (Math.random() * 24 - 8).toFixed(0); let sign = (trendDelta >= 0 ? '+' : ''); item.trend = `${sign}${trendDelta}%`; });
+                focusData.sort((a,b) => b.heat - a.heat);
+                renderFocusList();
+                const timerSpan = document.getElementById('focus-timer');
+                if(timerSpan) timerSpan.innerHTML = `热度数据实时波动 · 最新 ${new Date().toLocaleTimeString()}`;
+            }, 15000);
+        }
+        renderFocusList();
+        startDynamicHeat();
+
+        // 全源情报推荐三列卡片瀑布流数据 (类型多样: 资讯库、专利库、装备库、预警、关联发现、热点事件、专题、专家报告等)
+        const allSourceCards = [
+            { type: '资讯库', label: '最新资讯', icon: 'fa-newspaper', title: '美太空军发布下一代导弹预警卫星招标', desc: '强调对高超音速武器红外追踪能力升级，预计2030年部署。', tag: '热点事件', color: 'blue' },
+            { type: '专利库', label: 'AI翻译', icon: 'fa-certificate', title: '基于氮化镓的X波段相控阵雷达T/R模块设计', desc: '效率提升40%，体积缩小30%，或将改变机载火控格局。', tag: '技术突破', color: 'emerald' },
+            { type: '预警', label: 'AI异常预警', icon: 'fa-triangle-exclamation', title: '西太平洋某港口异常舰船集结', desc: '结合AIS与光学影像，发现3艘新型驱逐舰同时出坞，置信度89%。', tag: '动态追踪', color: 'rose' },
+            { type: '关联发现', label: '知识图谱', icon: 'fa-diagram-project', title: '高超音速导弹与CMC材料专利强关联', desc: '最新6项专利均指向同一研发团队，推测热防护取得实质突破。', tag: '隐含关系', color: 'amber' },
+            { type: '专题', label: '深度专题', icon: 'fa-layer-group', title: '无人机蜂群协同作战与抗干扰数据链', desc: '汇总DARPA、北约试验进展及抗量子加密应用。', tag: '战略前沿', color: 'purple' },
+            { type: '专家报告', label: '智库出品', icon: 'fa-file-pdf', title: '2026全球空天力量平衡评估', desc: '兰德公司发布，重点分析中俄高超音速武器及反制体系。', tag: '权威报告', color: 'indigo' },
+            { type: '热点事件', label: '实时脉动', icon: 'fa-bolt', title: '商业火箭公司实现首次空中发射高超音速试验平台', desc: '利用改装波音747发射，测试速度超过马赫5，引发业界关注。', tag: '产业动态', color: 'sky' },
+            { type: '装备库', label: '武器对比', icon: 'fa-rocket', title: '俄“锆石”高超音速导弹最新部署信息', desc: '新增两艘护卫舰搭载，射程/速度参数更新。', tag: '部署动态', color: 'emerald' },
+            { type: '遥感数据', label: '卫星影像', icon: 'fa-satellite', title: '西北某试验场高频次施工活动监测', desc: '近2个月夜间光源异常增多，推测进行发动机试车准备。', tag: '基建预警', color: 'cyan' }
+        ];
+        function renderAllSource() {
+            const grid = document.getElementById('all-source-grid');
+            if(!grid) return;
+            grid.innerHTML = allSourceCards.map(card => {
+                let colorClass = '';
+                if(card.color === 'blue') colorClass = 'border-l-blue-500';
+                else if(card.color === 'emerald') colorClass = 'border-l-emerald-500';
+                else if(card.color === 'rose') colorClass = 'border-l-rose-500';
+                else if(card.color === 'amber') colorClass = 'border-l-amber-500';
+                else if(card.color === 'purple') colorClass = 'border-l-purple-500';
+                else if(card.color === 'indigo') colorClass = 'border-l-indigo-500';
+                else if(card.color === 'sky') colorClass = 'border-l-sky-500';
+                else if(card.color === 'cyan') colorClass = 'border-l-cyan-500';
+                return `<div class="light-panel rounded-xl p-4 border-l-4 ${colorClass} hover:border-primary-300 transition-all duration-300 hover:shadow-md cursor-pointer group bg-white flex flex-col"><div class="flex items-center gap-2 mb-2"><i class="fa-solid ${card.icon} text-primary-500 text-sm"></i><span class="text-[10px] font-bold bg-${card.color === 'blue' ? 'blue' : card.color === 'emerald' ? 'emerald' : card.color === 'rose' ? 'rose' : card.color === 'amber' ? 'amber' : card.color === 'purple' ? 'purple' : card.color === 'indigo' ? 'indigo' : 'slate'}-50 text-${card.color === 'blue' ? 'blue' : card.color === 'emerald' ? 'emerald' : card.color === 'rose' ? 'rose' : card.color === 'amber' ? 'amber' : card.color === 'purple' ? 'purple' : card.color === 'indigo' ? 'indigo' : 'slate'}-600 px-2 py-0.5 rounded">${card.type}</span><span class="text-[10px] text-slate-400">${card.label}</span></div><h3 class="font-bold text-slate-800 text-sm mb-1 group-hover:text-primary-600 transition-colors">${card.title}</h3><p class="text-xs text-slate-500 line-clamp-2 mb-2">${card.desc}</p><div class="mt-auto flex justify-between items-center text-[10px]"><span class="text-${card.color === 'blue' ? 'blue' : card.color === 'emerald' ? 'emerald' : card.color === 'rose' ? 'rose' : card.color === 'amber' ? 'amber' : card.color === 'purple' ? 'purple' : card.color === 'indigo' ? 'indigo' : 'slate'}-500 font-medium"><i class="fa-regular fa-tag"></i> ${card.tag}</span><span class="text-slate-400"><i class="fa-regular fa-clock"></i> 推荐匹配度87%</span></div></div>`;
+            }).join('');
+        }
+        renderAllSource();
+    </script>
+</body>
+</html>

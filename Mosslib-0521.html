@@ -1,0 +1,4357 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css">
+    <title>MossLib 研判平台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary: #605CE5;
+            --primary-light: #EEF1FF;
+            --primary-hover: #4F4BD0;
+            --primary-ghost: rgba(96, 92, 229, 0.08);
+			--bg-body: #f8fafe; 
+            --bg-card: #FFFFFF;
+            --bg-sidebar: #FFFFFF;
+            --text-primary: #1A1A2E;
+            --text-secondary: #4A4A68;
+            --text-muted: #8A8AA3;
+            --border: #E8E8F0;
+            --border-light: #F0F0F8;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --shadow-sm: 0 1px 3px rgba(96, 92, 229, 0.04);
+            --shadow-md: 0 4px 16px rgba(96, 92, 229, 0.08);
+            --shadow-lg: 0 12px 32px rgba(96, 92, 229, 0.12);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+        }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(180deg, #EBF0F8 15%, #f8fafe 35%, #ffffff 45%);
+    color: var(--text-primary);
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+
+/* 快捷按钮白色底色 + 彩色图标 */
+.ai-shortcuts .shortcut-btn {
+    background: #FFFFFF;              /* 白色底色 */
+    border: 1px solid var(--border);  /* 原有边框，可保留或加浅灰边框 */
+    border-radius: 40px;
+    padding: 8px 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04); /* 轻微阴影增加层次 */
+}
+
+/* 图标颜色保持不变（低饱和度彩色） */
+.ai-shortcuts .shortcut-btn:nth-child(1) i { color: hsl(260, 50%, 60%); } /* 低饱和紫 */
+.ai-shortcuts .shortcut-btn:nth-child(2) i { color: hsl(210, 50%, 60%); } /* 低饱和蓝 */
+.ai-shortcuts .shortcut-btn:nth-child(3) i { color: hsl(40, 50%, 55%); }  /* 低饱和黄 */
+.ai-shortcuts .shortcut-btn:nth-child(4) i { color: hsl(150, 50%, 50%); } /* 低饱和绿 */
+.ai-shortcuts .shortcut-btn:nth-child(5) i { color: hsl(330, 50%, 65%); } /* 低饱和粉 */
+
+/* 文字颜色保持深灰色 */
+.ai-shortcuts .shortcut-btn span {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* 悬停效果 */
+.ai-shortcuts .shortcut-btn:hover {
+    border-color: var(--primary);
+    background: var(--primary-light); /* 可选：悬停时浅紫色背景 */
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+.ai-shortcuts .shortcut-btn:hover i {
+    filter: brightness(0.9); /* 图标颜色略微加深 */
+}
+
+
+
+        /* ========== 左侧导航栏 ========== */
+        .sidebar {
+            width: 180px;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            height: 100vh;
+            z-index: 100;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .sidebar.collapsed {
+            width: 68px;
+        }
+
+        /* 顶部 Brand */
+/* 品牌区域：flex 布局，水平两端对齐，垂直居中 */
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 16px;
+    height: 64px;
+    border-bottom: 1px solid var(--border);
+    position: relative;   /* 不再需要绝对定位上下文 */
+}
+
+.brand-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--primary);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: white;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+/* Logo 图片样式 */
+.brand-logo {
+    width: 120px;
+    border-radius: 10px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+/* 品牌文字：占据剩余空间，将按钮推到右边 */
+.brand-text {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;              /* 关键：撑开剩余空间 */
+}
+
+/* 收起/展开按钮：取消绝对定位，作为正常 flex 子项 */
+.collapse-btn {
+    position: static;     /* 清除绝对定位 */
+    width: 24px;
+    height: 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 10px;
+    color: var(--text-muted);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s;
+    flex-shrink: 0;
+    transform: none;
+    margin: 0;
+}
+
+.sidebar.collapsed .brand-logo {
+    width: 36px;
+    /* 如果需要居中，可以添加 margin: 0 auto; */
+}
+
+
+/* 侧边栏收起时，按钮旋转 180° */
+.sidebar.collapsed .collapse-btn {
+    transform: rotate(180deg);
+}
+
+/* 收起时隐藏品牌文字（原样式已有，但确保生效） */
+.sidebar.collapsed .brand-text {
+    opacity: 0;
+    width: 0;
+    flex: 0;
+}
+
+
+        .sidebar.collapsed .brand-text {
+            opacity: 0;
+            width: 0;
+        }
+
+        /* 收起按钮 */
+        .collapse-btn {
+            position: absolute;
+            right: -12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px; height: 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 10px;
+            color: var(--text-muted);
+            box-shadow: var(--shadow-sm);
+            z-index: 10;
+            transition: all 0.2s;
+        }
+
+        .collapse-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .sidebar.collapsed .collapse-btn {
+            transform: translateY(-50%) rotate(180deg);
+        }
+
+        /* 中部导航 */
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 12px 10px;
+			
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 12px 10px;
+    
+    /* 隐藏滚动条（Firefox） */
+    scrollbar-width: none;
+    /* 隐藏滚动条（IE/Edge） */
+    -ms-overflow-style: none;
+}
+
+/* 隐藏滚动条（Chrome/Safari/Opera） */
+.sidebar-nav::-webkit-scrollbar {
+    display: none;
+}
+       
+
+        .nav-section {
+            margin-bottom: 20px;
+        }
+
+        .nav-title {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            padding: 0 10px;
+            margin-bottom: 6px;
+            white-space: nowrap;
+            opacity: 1;
+            transition: opacity 0.2s;
+        }
+
+        .sidebar.collapsed .nav-title {
+            opacity: 0;
+            height: 0;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.15s;
+            margin-bottom: 2px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            position: relative;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .nav-item:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .nav-item.active {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 8px;
+            bottom: 8px;
+            width: 3px;
+            background: var(--primary);
+            border-radius: 0 3px 3px 0;
+        }
+
+        .nav-item .icon {
+            width: 20px;
+            text-align: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .nav-item .label {
+            flex: 1;
+            opacity: 1;
+            transition: opacity 0.2s;
+            overflow: hidden;
+        }
+
+        .sidebar.collapsed .nav-item .label {
+            opacity: 0;
+            width: 0;
+            flex: 0;
+        }
+
+        .nav-item .badge {
+            margin-left: auto;
+            background: var(--primary-light);
+            color: var(--primary);
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-weight: 700;
+            flex-shrink: 0;
+            opacity: 1;
+            transition: opacity 0.2s;
+        }
+
+        .sidebar.collapsed .nav-item .badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 8px; height: 8px;
+            padding: 0;
+            border-radius: 50%;
+            font-size: 0;
+        }
+
+        /* 底部个人中心 */
+        .sidebar-footer {
+            padding: 12px;
+            border-top: 1px solid var(--border);
+            background: var(--bg-body);
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .sidebar.collapsed .sidebar-footer {
+            padding: 12px 10px;
+        }
+
+        .profile-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            position: relative;
+        }
+
+        .profile-card:hover {
+            background: white;
+            border-color: var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .sidebar.collapsed .profile-card {
+            justify-content: center;
+        }
+
+        .profile-avatar {
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #818CF8, var(--primary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .profile-info {
+            flex: 1;
+            min-width: 0;
+            opacity: 1;
+            transition: opacity 0.2s;
+        }
+
+        .sidebar.collapsed .profile-info {
+            opacity: 0;
+            width: 0;
+            flex: 0;
+            overflow: hidden;
+        }
+
+        .profile-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.3;
+        }
+
+        .profile-role {
+            font-size: 11px;
+            color: var(--primary);
+            font-weight: 600;
+            margin-top: 1px;
+        }
+
+        .profile-arrow {
+            font-size: 10px;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+
+        .sidebar.collapsed .profile-arrow {
+            display: none;
+        }
+
+        .profile-card.active .profile-arrow {
+            transform: rotate(180deg);
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+            opacity: 1;
+            transition: opacity 0.2s;
+        }
+
+        .sidebar.collapsed .profile-actions {
+            opacity: 0;
+            height: 0;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .profile-action-btn {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 6px;
+            background: var(--bg-card);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            border: 1px solid var(--border);
+            transition: all 0.15s;
+            position: relative;
+        }
+
+        .profile-action-btn:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .notif-badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 12px;
+            height: 12px;
+            background: var(--danger);
+            border-radius: 50%;
+            border: 2px solid var(--bg-card);
+        }
+
+        /* 角色下拉菜单 */
+        .role-dropdown {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 12px;
+            right: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 8px;
+            display: none;
+            box-shadow: var(--shadow-lg);
+            z-index: 200;
+        }
+
+        .role-dropdown.active { display: block; }
+
+        .role-option {
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            transition: all 0.15s;
+            color: var(--text-secondary);
+        }
+
+        .role-option:hover { background: var(--primary-light); color: var(--primary); }
+
+        .role-option.active {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        /* ========== 右侧主体 ========== */
+.content {
+    flex: 1;
+    overflow-y: auto;
+    background: transparent;   /* 改为透明 */
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+        .page { display: none; animation: fadeIn 0.3s ease; }
+        .page.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+.content > .page {
+    padding: 24px 28px;
+    padding-top: 70px;  /* 根据固定栏高度调整 */
+    max-width: 1400px;
+}
+
+        /* 页面标题 */
+        .page-header {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .page-header-left h1 {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 4px;
+        }
+
+        .page-header-left p {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .role-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            background: var(--primary-light);
+            color: var(--primary);
+            border: 1px solid rgba(96, 92, 229, 0.15);
+        }
+
+        .global-search {
+            position: relative;
+            flex: 0 1 380px;
+            min-width: 240px;
+        }
+
+        .global-search input {
+            width: 100%;
+            height: 40px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 0 16px 0 40px;
+            color: var(--text-primary);
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .global-search input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(96, 92, 229, 0.08);
+        }
+
+        .global-search::before {
+            content: "";
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px; height: 16px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%238A8AA3' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'/%3E%3C/svg%3E") no-repeat center;
+            background-size: contain;
+        }
+
+        .global-search .ai-badge {
+            position: absolute;
+            right: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 3px 10px;
+            border-radius: 14px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .global-search .ai-badge:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* ========== 工作台布局 ========== */
+.workspace-chat {
+    display: flex;
+    gap: 20px;
+    height: calc(100vh - 120px);
+    min-height: 300px;
+    /* width:1200px;  ← 删除或注释掉这一行 */
+    width: 100%;        /* 让父容器自适应页面宽度 */
+	margin-top: 0 !important;
+    margin-bottom: 0 !important;
+	height:460px;
+}
+
+.workspace-layout {
+    display: flex;
+    gap: 20px;
+    height: calc(100vh - 120px);
+    min-height: 500px;
+    width:1000px; 
+    width: 100%;        /* 让父容器自适应页面宽度 */
+	margin-top: 0 !important;
+    margin-bottom: 20px !important;
+	height:360px;
+}
+
+.workspace-sub {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+    align-items: center;  /* 新增：所有子项（包括AI卡片）水平居中 */
+}
+		
+/* 让待办+信息哨兵区域居中，内部两个卡片等宽 */
+.workspace-todo-sentry {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.workspace-todo-sentry .card {
+    flex: 1 1 0;          /* 允许按比例分配剩余空间 */
+    min-width: 450px;     /* 最小宽度，实际会更宽 */
+}
+
+/* 确保信息哨兵内部滚动正常（原样式已有） */
+.workspace-todo-sentry .card:last-child {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+.workspace-todo-sentry .sentinel-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+        /* ========== 卡片基础 ========== */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+        }
+		
+.card-chat {
+    background: transparent;   /* 或者 background: rgba(255,255,255,0.6); 半透效果 */
+    border: unset;
+    border-radius: var(--radius-lg);
+    padding: 0px;
+    box-shadow: unset;
+}
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+
+.card-title {
+    font-size: 18px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.card-title i {
+    font-size: 20px;
+    color: var(--primary);
+}
+
+        .card-action {
+            font-size: 12px;
+            color: var(--primary);
+            cursor: pointer;
+            font-weight: 700;
+            transition: opacity 0.2s;
+        }
+
+        .card-action:hover { opacity: 0.8; }
+
+        /* ========== AI对话区 - 大输入框样式 ========== */
+.ai-chat-main {
+    display: flex;
+    flex-direction: column;
+    width: 820px;          /* 固定宽度 */
+    max-width: 100%;       /* 小屏自适应 */
+    min-height: 360px;
+    background: transparent;
+    border: unset;
+    /* 不要设置 margin、flex、align-self 等 */
+}
+        .title-main {
+            text-align: center;
+            padding: 0px 0 16px;
+            flex-shrink: 0;
+        }
+
+        .title-main h2 {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+        }
+
+
+        .ai-chat-welcome {
+            text-align: center;
+            padding: 20px 0 16px;
+            flex-shrink: 0;
+        }
+
+        .ai-chat-welcome h2 {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .ai-chat-welcome p {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        /* 大输入框容器 */
+        .ai-input-large-wrap {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 16px 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .ai-input-large-wrap:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 4px 20px rgba(96, 92, 229, 0.12);
+        }
+
+.ai-input-large {
+    width: 100%;
+    min-height: 120px;      /* 原为 88px，调高 */
+    max-height: 180px;      /* 可保留最大高度限制，避免过高 */
+    border: none;
+    outline: none;
+    font-size: 14px;
+    resize: none;
+    font-family: inherit;
+    background: transparent;
+    padding: 16px 20px;
+}
+
+
+        .ai-input-large::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* 输入框底部工具栏 */
+        .ai-input-tools {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .ai-tools-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ai-tool-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .ai-tool-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .ai-tool-btn.active {
+            background: var(--primary-light);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .ai-tool-icon {
+            width: 16px; height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ai-tools-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ai-agent-selector {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .ai-agent-selector:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .ai-send-round {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: var(--primary);
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .ai-send-round:hover {
+            background: var(--primary-hover);
+            transform: scale(1.05);
+        }
+
+        .ai-send-round:disabled {
+            background: var(--border);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 快捷功能按钮 - 参考图片风格 */
+        .ai-shortcuts {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+            padding: 4px 0;
+			margin-top: 8px;
+        }
+
+        .shortcut-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            color: var(--text-secondary);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .shortcut-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--primary-light);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .shortcut-btn .icon {
+            font-size: 15px;
+        }
+
+        /* ========== 消息区域（对话展开时） ========== */
+        .ai-chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 14px;
+            padding-right: 4px;
+        }
+
+        .ai-message-row {
+            display: flex;
+            gap: 10px;
+            animation: messageIn 0.3s ease;
+        }
+
+        .ai-message-row.user {
+            flex-direction: row-reverse;
+        }
+
+        @keyframes messageIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .ai-avatar {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+            font-weight: 700;
+        }
+
+        .ai-avatar.user {
+            background: linear-gradient(135deg, #818CF8, var(--primary));
+        }
+
+        .ai-bubble {
+            max-width: 75%;
+            padding: 10px 14px;
+            border-radius: 14px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            background: var(--bg-body);
+            border: 1px solid var(--border-light);
+        }
+
+        .ai-message-row.user .ai-bubble {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* ========== 我的智能体 ========== */
+        .my-agents-row {
+            display: flex;
+            gap: 10px;
+            align-items: stretch;
+        }
+
+        .agent-card-mini {
+            flex: 1;
+            padding: 12px;
+            background: var(--bg-body);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .agent-card-mini:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .agent-card-mini .icon {
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+
+        .agent-card-mini .name {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .agent-card-mini .desc {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 1px;
+        }
+
+        .enter-plaza {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            padding: 12px;
+            background: var(--primary-light);
+            border: 1px dashed var(--primary);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 700;
+            transition: all 0.2s;
+            min-width: 80px;
+        }
+
+        .enter-plaza:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .enter-plaza .plus {
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        /* ========== 推荐内容 ========== */
+
+
+
+/* 多列瀑布流布局 */
+.card-grid {
+    column-count: 2;
+    column-gap: 26px;
+}
+
+/* 单个卡片：强制边框、圆角、阴影 */
+.recommend-card-item {
+    break-inside: avoid;
+    margin-bottom: 20px;
+    display: inline-block;
+    width: 100%;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);   /* 浅灰色边框 */
+    border-radius: var(--radius-md);          /* 圆角 12px */
+    box-shadow: var(--shadow-sm);             /* 轻度阴影 */
+    overflow: hidden;                         /* 保证圆角裁剪图片 */
+    transition: all 0.2s;
+}
+
+.recommend-card-item:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-light);
+}
+
+
+/* 卡片图片 - 仅在有图片时显示 */
+.card-image {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    background: var(--primary-light);
+    display: block;          /* 改为 block，不预留额外空间 */
+}
+
+/* 无图片时，不显示任何占位元素，已通过条件渲染实现 */
+
+/* 无图片时的占位图标 */
+.card-image-placeholder {
+    background: var(--bg-body);
+    color: var(--text-muted);
+    font-size: 28px;
+}
+
+/* 卡片内容区 */
+.card-content {
+    padding: 20px 26px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* 元数据行（日期、国家、作者等） */
+.card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--text-muted);
+    border-bottom: 1px dashed var(--border-light);
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+}
+
+.card-meta i {
+    color: var(--text-muted);   /* 浅灰色，对应 #8A8AA3 */
+    font-size: 12px;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+
+.card-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+
+.card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.4;
+    margin: 0 0 4px 0;
+}
+
+.card-title a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.card-title a:hover {
+    color: var(--primary);
+}
+
+.card-authors {
+    font-size: 13px;
+    color: var(--text-secondary);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: baseline;
+}
+
+.card-stats {
+    display: flex;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--primary);
+    font-weight: 500;
+}
+
+.card-stats .citations {
+    color: var(--success);
+}
+
+.card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 4px 0;
+}
+
+.card-tag {
+    background: var(--primary-light);
+    color: var(--primary);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.card-abstract {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-top: 6px;
+}
+
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 12px;
+    font-size: 12px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border-light);
+}
+
+.card-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.card-actions i {
+    font-size: 18px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.card-actions i:hover {
+    color: var(--primary);
+}
+
+.card-footer .read-more {
+    color: var(--primary);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+
+        .feed-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .feed-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg-body);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-light);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .feed-item:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .feed-badge {
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 800;
+            flex-shrink: 0;
+            height: fit-content;
+        }
+
+        .feed-badge.expert { background: #FEF3C7; color: #92400E; }
+        .feed-badge.remote { background: #DBEAFE; color: #1E40AF; }
+        .feed-badge.open { background: #D1FAE5; color: #065F46; }
+
+        .feed-content { flex: 1; min-width: 0; }
+
+        .feed-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 3px;
+            line-height: 1.4;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .feed-excerpt {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .feed-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 6px;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .feed-ai-btn {
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: white;
+            color: var(--primary);
+            font-size: 10px;
+            font-weight: 700;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .feed-ai-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* ========== 右侧：待办任务 - 紧凑布局 ========== */
+        .todo-list-compact {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .todo-item-compact {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: var(--bg-body);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-light);
+            cursor: pointer;
+            transition: all 0.15s;
+            position: relative;
+        }
+
+        .todo-item-compact:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .todo-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .todo-dot.high { background: var(--danger); }
+        .todo-dot.medium { background: var(--warning); }
+        .todo-dot.low { background: var(--success); }
+
+        .todo-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .todo-title-compact {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.3;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 2px;
+        }
+
+        .todo-meta-compact {
+            display: flex;
+            gap: 8px;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .todo-tag-compact {
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            background: white;
+            color: var(--primary);
+            border: 1px solid var(--border);
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        /* ========== 信息哨兵 - 扩大区域 ========== */
+.sentinel-list {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;      /* 隐藏横向滚动条 */
+    word-wrap: break-word;   /* 强制长单词换行 */
+    word-break: break-word;  /* 兼容性 */
+}
+
+.sentinel-item {
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-light);
+    font-size: 13px;
+    transition: all 0.2s;
+    cursor: pointer;
+    word-break: break-word;   /* 避免长文本溢出 */
+}
+
+        .sentinel-item:hover {
+            border-color: var(--primary);
+            transform: translateX(2px);
+        }
+
+        .sentinel-item.alert {
+           /* background: #FEF2F2;
+           border-color: #FECACA;*/
+		   background: #fff;
+           border-color: #fff;
+        }
+
+        .sentinel-item.info {
+            /*background: #EFF6FF;
+            border-color: #BFDBFE;*/
+					   background: #fff;
+           border-color: #fff;
+        }
+
+        .sentinel-item.tip {
+            /*background: #F0FDF4;
+            border-color: #BBF7D0;*/
+					   background: #fff;
+           border-color: #fff;
+        }
+
+        .sentinel-label {
+            font-weight: 800;
+            margin-bottom: 3px;
+            font-size: 12px;
+        }
+
+        .sentinel-item.alert .sentinel-label { color: var(--danger); }
+        .sentinel-item.info .sentinel-label { color: var(--primary); }
+        .sentinel-item.tip .sentinel-label { color: var(--success); }
+
+        .sentinel-desc {
+            color: var(--text-secondary);
+            line-height: 1.5;
+            font-size: 12px;
+        }
+
+        .sentinel-time {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        /* ========== 其他页面通用 ========== */
+        .intel-filters {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-chip {
+            padding: 6px 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.15s;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .filter-chip:hover, .filter-chip.active {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .trans-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .trans-table th {
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            font-weight: 700;
+            background: var(--bg-body);
+        }
+
+        .trans-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-light);
+            color: var(--text-secondary);
+        }
+
+        .trans-table tr:hover td {
+            background: var(--primary-light);
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .status-progress { background: #EFF6FF; color: #1D4ED8; }
+        .status-review { background: #FFFBEB; color: #B45309; }
+        .status-done { background: #ECFDF5; color: #047857; }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 20px;
+        }
+
+        .stat-card {
+            grid-column: span 3;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 24px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 20px;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -24px;
+            top: 2px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 2px solid var(--primary);
+        }
+
+        .timeline-content {
+            background: var(--bg-body);
+            padding: 14px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-light);
+        }
+
+        /* 滚动条 */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+
+        .hidden { display: none !important; }
+		
+
+.sub-tag {
+ height: 42px;  
+  line-height: normal;  
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 20px 12px;          /* 增加上下内边距，使标签更高 */
+background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;        /* 圆角减小（原30px） */
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sub-tag:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);   /* 悬停时浅紫色背景，可选 */
+}
+
+.sub-tag.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.sub-tag .sub-icon {
+    font-size: 14px;
+}
+
+/* 更多下拉容器 */
+.more-dropdown {
+    position: relative;
+    display: inline-block;
+}
+.more-dropdown .sub-tag {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+.dropdown-content {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    padding: 8px;
+    z-index: 100;
+    display: none;
+    min-width: 200px;
+    flex-direction: column;
+    gap: 6px;
+}
+.dropdown-content.show {
+    display: flex;
+}
+.dropdown-content .sub-tag {
+    margin: 0;
+}
+
+/* 卡片上的订阅标记 */
+.card-sub-badge {
+    background: var(--primary-light);
+    color: var(--primary);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    width: fit-content;
+    cursor: pointer;
+    transition: 0.1s;
+}
+.card-sub-badge:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.card-sub-badge i {
+    font-size: 12px;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+
+/* 推荐区域外层容器（无卡片样式） */
+.recommend-wrapper {
+    width: 100%;
+    max-width: 1100px;
+    margin: 80px auto 0 auto;
+}
+
+/* 标题行居中 */
+.recommend-header {
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.recommend-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.recommend-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+/* 订阅标签栏区域：标签居中，管理按钮在右侧 */
+.subscription-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.subscription-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    flex: 1;
+    justify-content: center;   /* 标签居中 */
+}
+
+.subscription-manage {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: color 0.2s;
+    height: 32px;           /* 与 .sub-tag 的高度一致 */
+    padding: 0 8px;         /* 可选，增加点击区域 */
+    line-height: 1;
+}
+
+
+.subscription-manage:hover {
+    opacity: 0.8;
+}
+
+
+/* 每个卡片避免断页，且内部保持块级 */
+.recommend-card-item {
+    break-inside: avoid;          /* 防止卡片被截断跨列 */
+    margin-bottom: 20px;
+    display: inline-block;        /* 使宽度自适应 */
+    width: 100%;
+}
+
+/* 其他卡片内部样式（如 .card-image, .card-content 等）保持不变 */
+
+.subscription-manage {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: color 0.2s;
+}
+.subscription-manage:hover {
+    color: var(--primary);
+}
+.subscription-manage i {
+    font-size: 14px;
+}
+
+/* 确保父容器垂直居中 */
+.subscription-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+/* 全局工具栏 */
+.global-toolbar {
+    position: fixed;
+    top: 10px;
+    right: 20px;          /* 关键：距离右侧边缘 20px */
+    z-index: 1000;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    background: transparent;
+    width: auto;
+    /* 确保不被其他规则覆盖 */
+margin-left: auto 
+}
+
+/* 移除原有的 .global-toolbar 下的多余样式（margin、padding 等） */
+
+.toolbar-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: #FFFFFF;
+    border: 1px solid var(--border);
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    white-space: nowrap;
+    width: auto;
+}
+
+.toolbar-tag:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.toolbar-tag i {
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.toolbar-tag .badge {
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: 20px;
+    padding: 0 6px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: 2px;
+}
+
+.toolbar-tag:hover .badge {
+    background: var(--primary);
+    color: white;
+}
+
+/* 缩进子菜单（可选） */
+.nav-section .nav-item {
+    padding-left: 20px;
+}
+.nav-section .nav-section .nav-item {
+    padding-left: 20px;
+}
+		
+		
+		.todo-type-compact {
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    background: #E6F7FF;
+    color: #1890FF;
+    border: 1px solid #91D5FF;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+/* 可选：不同类型不同颜色（根据需要扩展） */
+.todo-type-compact[data-type="课题研究"] { background: #F6FFED; color: #52C41A; border-color: #B7EB8F; }
+.todo-type-compact[data-type="翻译任务"] { background: #FFF7E6; color: #FA8C16; border-color: #FFD591; }
+.todo-type-compact[data-type="数据审核"] { background: #F9F0FF; color: #722ED1; border-color: #D3ADF7; }
+
+
+.ai-send-round {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    padding: 0;
+}
+.ai-send-round i {
+    font-size: 18px;
+    line-height: 1;
+    color: white;
+    /* 微调位置：根据实际效果调整 1px 或 2px */
+    transform: translateY(1px);
+}
+.ai-send-round:hover {
+    background: var(--primary-hover);
+    transform: scale(1.05);
+}
+
+/* 内容类型标签 */
+.card-type-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    color: #333;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+/* 置信度标签基础样式 */
+.card-confidence-tag {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* 高置信度 */
+.confidence-high {
+    background: #E8F5E9;
+    color: #2E7D32;
+    border: 1px solid #A5D6A7;
+}
+
+/* 中置信度 */
+.confidence-mid {
+    background: #FFF3E0;
+    color: #E65100;
+    border: 1px solid #FFCC80;
+}
+
+/* 低置信度 */
+.confidence-low {
+    background: #FFEBEE;
+    color: #C62828;
+    border: 1px solid #EF9A9A;
+}
+
+/* 未知置信度 */
+.confidence-unknown {
+    background: #F5F5F5;
+    color: #757575;
+    border: 1px solid #E0E0E0;
+}
+
+@media (min-width: 768px) {
+    .card-grid { column-count: 2; }
+}
+@media (min-width: 1200px) {
+    .card-grid { column-count: 3; }
+}
+@media (min-width: 1600px) {
+    .card-grid { column-count: 4; }
+}
+/* AI每日简报 */
+.ai-daily-brief {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.brief-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;  /* 与待办卡片头部下边距一致 */
+}
+
+.brief-title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.brief-title {
+    font-size: 18px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.brief-title i {
+    font-size: 20px;
+    color: var(--primary);
+}
+
+.brief-subtitle.inline {
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: normal;
+    /* 保持与原副标题样式一致，无下划线 */
+}
+
+.brief-subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+margin-top:2px;
+}
+
+.brief-controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.brief-select {
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+.brief-refresh-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: var(--primary-light);
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.brief-refresh-btn:hover {
+    background: var(--primary);
+    color: white;
+}
+.brief-refresh-btn i {
+    font-size: 14px;
+}
+
+.brief-summary-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-right: 4px;
+    max-height: 400px; /* 保留限制 */
+}
+.brief-item {
+    display: flex;
+    gap: 14px;
+    padding: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    transition: all 0.15s;
+}
+.brief-item:hover {
+    background: var(--primary-light);
+    transform: translateX(2px);
+}
+.brief-index {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--primary);
+    min-width: 12px;
+    text-align: right;
+}
+.brief-content {
+    flex: 1;
+}
+.brief-title-text {
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    font-size: 15px;
+    line-height: 1.4;
+    cursor: pointer;
+}
+.brief-title-text:hover {
+    color: var(--primary);
+    text-decoration: underline;
+}
+.brief-summary-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 6px;
+}
+.brief-meta {
+    font-size: 11px;
+    color: var(--text-muted);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+.brief-source {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.brief-loading, .brief-empty {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-muted);
+}
+
+/* 哨兵下拉面板 */
+.sentinel-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 360px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    z-index: 9999;       /* 提高层级 */
+    display: none;
+    flex-direction: column;
+    max-height: 400px;
+    overflow-y: auto;
+    margin-top: 0;        /* 确保紧贴触发器 */
+}
+
+.sentinel-dropdown.show { display: flex; }
+.dropdown-header {
+    padding: 12px 16px;
+    font-weight: 700;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.dropdown-header a { color: var(--primary); font-size: 12px; text-decoration: none; }
+.sentinel-dropdown-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-light);
+    cursor: pointer;
+    transition: background 0.1s;
+}
+.sentinel-dropdown-item:hover { background: var(--primary-light); }
+.item-title { font-weight: 700; margin-bottom: 4px; font-size: 13px; }
+.item-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.4; margin-bottom: 4px; }
+.item-time { font-size: 11px; color: var(--text-muted); }
+.dropdown-empty { padding: 24px; text-align: center; color: var(--text-muted); }
+
+/* 哨兵通知样式 */
+/* 哨兵通知样式 - 长条形 */
+.sentinel-notification {
+    position: fixed;
+    top: 10px;
+    right: 20px;
+    width: 480px;               /* 加宽 */
+    background: white;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    padding: 8px 16px;          /* 上下内边距减小，高度变小 */
+    z-index: 1100;
+    cursor: pointer;
+    transform: translateX(120%);
+    transition: transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+.sentinel-notification.show {
+    transform: translateX(0);
+}
+.notif-content {
+    flex: 1;
+}
+.notif-title {
+    font-weight: 800;
+    margin-bottom: 2px;
+    color: var(--text-primary);
+    font-size: 11px;
+}
+.notif-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 2px;
+    line-height: 1.4;
+}
+.notif-time {
+    font-size: 10px;
+    color: var(--text-muted);
+}
+.notif-close {
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--text-muted);
+    padding: 4px;
+    line-height: 1;
+    transition: color 0.2s;
+}
+.notif-close:hover {
+    color: var(--danger);
+}
+
+
+/* 哨兵固定悬浮窗模式 */
+.sentinel-dropdown.sentinel-fixed {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    top: auto;
+    left: auto;
+    width: 360px;
+    display: flex;
+    margin-top: 0;
+    box-shadow: var(--shadow-lg);
+    z-index: 1001;
+}
+
+/* 左右两列布局 */
+.daily-todo-row {
+    display: flex;
+    gap: 24px;
+    margin: 20px 50px;      /* 上下边距，左右自动居中 */
+    max-width: 1100px;      /* 限制最大宽度，可根据需要调整 */
+    width: 100%;
+	max-height: 500px;
+}
+
+.daily-brief-col {
+    width: 60%;
+    flex-shrink: 0;  /* 防止压缩 */
+}
+
+.todo-col {
+   width: 38%;
+    flex-shrink: 0;
+}
+
+.todo-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.todo-list-compact {
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* 响应式：小屏幕时堆叠 */
+@media (max-width: 900px) {
+    .daily-todo-row {
+        flex-direction: column;
+    }
+    .todo-col {
+        width: 100%;
+    }
+}
+
+.todo-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;  /* 与 .brief-header 的 margin-bottom 一致 */
+    padding-bottom: 0;    /* 不加下边框，或根据需求添加 */
+    border-bottom: none;  /* 如果之前有下边框可以去掉，或保留 */
+}
+
+/* 输入框标题行 */
+.chat-input-header {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    text-align: left;
+    padding-left: 4px;
+}
+
+/* 浅色标题行 */
+.chat-title-bar {
+    background: var(--primary-light);  /* 浅紫色背景，可改为 #F2F3F8 等更淡 */
+    border-radius: 40px;               /* 圆角胶囊，与图片类似 */
+    padding: 6px 16px;
+    margin-bottom: 12px;
+    display: inline-block;             /* 宽度自适应内容，居左 */
+    width: auto;                       /* 不占满整行 */
+}
+.chat-title-bar span {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--primary);             /* 主题色文字，保持柔和 */
+}
+
+/* 输入框容器调整为 flex 列，无固定高度 */
+.ai-input-large-wrap {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 0;                    /* 内边距归零，由内部元素控制 */
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;             /* 确保圆角裁剪 */
+}
+
+.input-title-bar span {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* 工具栏样式微调 */
+.ai-input-tools {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0;
+    padding: 10px 20px;
+    border-top: 1px solid var(--border-light);
+}
+
+/* 标题行左右布局 */
+.input-title-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items:center;
+    background: var(--primary-light);
+    padding: 8px 20px;
+    border-bottom: 1px solid var(--border-light);
+}
+.title-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.history-btn {
+    font-size: 18px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.history-btn:hover {
+    color: var(--primary);
+}
+
+.sub-icon {
+    font-size: 14px;
+}
+.sub-title {
+    /* 文字样式 */
+}
+.sub-badge {
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: 20px;
+    padding: 0 6px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: 4px;
+    line-height: 18px;
+}
+.sub-tag.active .sub-badge {
+    background: white;
+    color: var(--primary);
+}
+
+.sub-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.sub-badge {
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: 20px;
+    padding: 0 8px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 22px;
+    margin-left: 4px;
+}
+.sub-tag.active .sub-badge {
+    background: white;
+    color: var(--primary);
+}
+
+.sub-avatar-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary-light);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.sub-avatar-icon i {
+    font-size: 14px;
+    color: var(--primary);
+}
+		
+    </style>
+
+
+
+    <!-- 左侧导航 -->
+    <aside class="sidebar" id="sidebar">
+        <!-- 顶部标题行 -->
+<div class="sidebar-brand">
+    <img id="brandLogo" class="brand-logo" src="https://nanaly.oss-cn-beijing.aliyuncs.com/mosslib-v2/img/logo_00.png" alt="MossLib">
+    <div class="collapse-btn" onclick="toggleSidebar()">◀</div>
+</div>
+
+        <!-- 中部导航菜单 -->
+<div class="sidebar-nav">
+    <div class="nav-section">
+        <div class="nav-title">工作空间</div>
+        <div class="nav-item active" onclick="navigate('workspace')">
+            <i class="ri-home-line icon"></i>
+            <span class="label">工作台</span>
+            <span class="badge">5</span>
+        </div>
+		        <div class="nav-item" onclick="navigate('intelligence')">
+            <i class="ri-global-line icon"></i>
+            <span class="label">情报中心</span>
+        </div>
+
+		        <div class="nav-item" onclick="navigate('research')">
+            <i class="ri-flask-line icon"></i>
+            <span class="label">课题研究</span>
+        </div>
+    <div class="nav-item" onclick="navigate('creation')">
+        <i class="ri-quill-pen-line icon"></i>
+        <span class="label">创作中心</span>
+    </div>
+        <div class="nav-item" onclick="navigate('translation')">
+            <i class="ri-translate icon"></i>
+            <span class="label">翻译中心</span>
+        </div>
+    </div>
+    <div class="nav-section">
+        <div class="nav-title">AI 赋能</div>
+        <div class="nav-item" onclick="navigate('agents')">
+            <i class="ri-robot-line icon"></i>
+            <span class="label">智能体广场</span>
+        </div>
+        <div class="nav-item" onclick="navigate('compute')">
+            <i class="ri-cpu-line icon"></i>
+            <span class="label">算力超市</span>
+        </div>
+    </div>
+	
+<!-- 数据管理 -->
+<div class="nav-section">
+    <div class="nav-title">数据管理</div>
+    <div class="nav-item" onclick="navigate('internal-data')">
+        <i class="ri-database-line icon"></i>
+        <span class="label">内部数据</span>
+    </div>
+    <div class="nav-item" onclick="navigate('external-data')">
+        <i class="ri-cloud-line icon"></i>
+        <span class="label">外部数据</span>
+    </div>
+</div>
+
+<!-- 协同管理 -->
+<div class="nav-section">
+    <div class="nav-title">协同管理</div>
+	    <div class="nav-item" onclick="navigate('user-mgmt')">
+        <i class="ri-user-line icon"></i>
+        <span class="label">用户与角色</span>
+    </div>
+    <div class="nav-item" onclick="navigate('team-mgmt')">
+        <i class="ri-team-line icon"></i>
+        <span class="label">团队管理</span>
+    </div>
+    <div class="nav-item" onclick="navigate('term-mgmt')">
+        <i class="ri-book-open-line icon"></i>
+        <span class="label">术语管理</span>
+    </div>
+    <div class="nav-item" onclick="navigate('category-mgmt')">
+        <i class="ri-price-tag-3-line icon"></i>
+        <span class="label">类别管理</span>
+    </div>
+	    <div class="nav-item" onclick="navigate('category-mgmt')">
+        <i class="ri-price-tag-3-line icon"></i>
+        <span class="label">系统设置</span>
+    </div>
+
+</div>
+</div>
+
+        <!-- 底部个人中心 -->
+        <div class="sidebar-footer">
+            <div class="profile-card" id="profileCard" onclick="toggleRoleDropdown()">
+                <div class="profile-avatar" id="sidebarAvatar">研</div>
+                <div class="profile-info">
+                    <div class="profile-name">张宇航</div>
+                    <div class="profile-role" id="sidebarRole">研究员</div>
+                </div>
+                <span class="profile-arrow">▼</span>
+            </div>
+
+            <!-- 角色下拉菜单 -->
+            <div class="role-dropdown" id="roleDropdown">
+                <div class="role-option active" onclick="switchRole(&#39;researcher&#39;, event)">
+                    <span style="font-size: 14px;">🔬</span> 研究员
+                </div>
+                <div class="role-option" onclick="switchRole(&#39;translator&#39;, event)">
+                    <span style="font-size: 14px;">🌐</span> 译员
+                </div>
+                <div class="role-option" onclick="switchRole(&#39;manager&#39;, event)">
+                    <span style="font-size: 14px;">📊</span> 管理者
+                </div>
+                <div class="role-option" onclick="switchRole(&#39;dataadmin&#39;, event)">
+                    <span style="font-size: 14px;">🗃️</span> 数据管理员
+                </div>
+                <div class="role-option" onclick="switchRole(&#39;analyst&#39;, event)">
+                    <span style="font-size: 14px;">📈</span> 分析师
+                </div>
+            </div>
+        </div>
+    </aside>
+
+<div class="global-toolbar">
+    <div class="toolbar-tag" id="globalTodoTag">
+        <i class="ri-checkbox-circle-line"></i> 待办 <span class="badge" id="todoCount">5</span>
+    </div>
+    <!-- 哨兵触发器 -->
+<div class="toolbar-tag" id="sentinelTrigger" onclick="toggleSentinelPanel(event)">
+    <i class="ri-alert-line"></i> AI 哨兵 <span class="badge" id="sentinelCount">3</span>
+</div>
+    <!-- 哨兵下拉面板 -->
+    <div class="sentinel-dropdown" id="sentinelDropdown"></div>
+</div>
+
+    <!-- 右侧主体 -->
+    <main class="content">
+	
+
+        
+        <!-- 个人工作中心（默认页） -->
+        <div id="page-workspace" class="page active">
+
+            <!-- 工作台左右布局 -->
+            <div class="workspace-chat">
+                
+                <!-- 左侧 65% -->
+                <div class="workspace-sub">
+                    
+                    <!-- 1. AI对话区 - 大输入框 -->
+                    <div class="card-chat ai-chat-main">
+                         <!-- 欢迎语 -->
+                        <div class="title-main" id="titleMain">
+                            <h2>MossLib 多语内容服务与信息决策平台</h2>
+                        </div>
+                        <!-- 消息区域（默认隐藏，对话后显示） -->
+                        <div class="ai-chat-messages hidden" id="chatMessages"></div>
+
+                        <!-- 大输入框 -->
+                        <div class="ai-input-large-wrap">
+
+    <div class="input-title-bar">
+    <div class="title-left">
+    <span style="padding-top:3px;"><i class="ri-chat-smile-line"></i></span>
+        <span>智能情报研判助手</span>
+</div>
+<i class="ri-history-line history-btn" title="历史记录"></i>
+    </div>
+
+                            <textarea class="ai-input-large" id="mainChatInput" placeholder="帮你查信息、写报告、翻译文档，也可以随便问我点什么" rows="2" onkeydown="if(event.key===&#39;Enter&#39; &amp;&amp; !event.shiftKey){event.preventDefault();sendMainChat();}"></textarea>
+                            <div class="ai-input-tools">
+								
+								<div class="ai-tools-left">
+    <div class="ai-tool-btn" title="附件">
+        <i class="ri-attachment-line ai-tool-icon"></i>
+    </div>
+    <div class="ai-tool-btn active" title="深度思考">
+        <i class="ri-lightbulb-line ai-tool-icon"></i>
+        <span>思考</span>
+    </div>
+    <div class="ai-tool-btn" title="联网搜索">
+        <i class="ri-global-line ai-tool-icon"></i>
+        <span>联网</span>
+    </div>
+</div>
+                                <div class="ai-tools-right">
+
+                                    <button class="ai-send-round" id="sendBtn" onclick="sendMainChat()">
+    <i class="ri-send-plane-fill"></i>
+</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 快捷功能按钮 -->
+<div class="ai-shortcuts" id="aiShortcuts">
+    <div class="shortcut-btn" onclick="sendAgentPrompt('查线索')">
+        <i class="ri-search-fill icon"></i>
+        <span>查线索</span>
+    </div>
+    <div class="shortcut-btn" onclick="sendAgentPrompt('写报告')">
+        <i class="ri-file-text-fill icon"></i>
+        <span>写报告</span>
+    </div>
+    <div class="shortcut-btn" onclick="sendAgentPrompt('智能选题')">
+        <i class="ri-lightbulb-fill icon"></i>
+        <span>智能选题</span>
+    </div>
+    <div class="shortcut-btn" onclick="sendAgentPrompt('观点聚类')">
+        <i class="ri-group-fill icon"></i>
+        <span>观点聚类</span>
+    </div>
+    <div class="shortcut-btn" onclick="sendAgentPrompt('象胥翻译')">
+        <i class="ri-global-fill icon"></i>
+        <span>象胥翻译</span>
+    </div>
+    <div class="shortcut-btn" onclick="sendAgentPrompt('更多')">
+        <span class="plus">+</span>
+        <span>更多</span>
+    </div>
+</div>
+                    </div>
+                    
+                </div>
+
+                <!-- 右侧 35% -->
+                
+            </div>
+        <div class="workspace-layout">
+               
+
+<!-- 新增左右布局容器 -->
+<div class="daily-todo-row">
+    <!-- 左侧：AI日报 -->
+    <div class="daily-brief-col">
+        <!-- AI 日报 -->
+<div class="ai-daily-brief">
+    <div class="brief-header">
+        <div class="brief-title-wrapper">
+            <div class="brief-title">
+                <i class="ri-newspaper-line"></i> AI 日报
+            </div>
+            <span class="brief-subtitle inline">基于您的订阅智能生成</span>
+        </div>
+        <div class="brief-controls">
+            <select id="briefTimeRange" class="brief-select">                
+<option value="24h" selected>最近24小时</option>
+                <option value="3d">最近3天</option>
+                <option value="7d">最近7天</option></select>
+            <select id="briefSubFilter" class="brief-select">
+                <option value="all" selected>全部订阅</option>
+            </select>
+             <button id="briefRefreshBtn" class="brief-refresh-btn">
+                <i class="ri-refresh-line"></i> 
+            </button>
+        </div>
+    </div>
+    <!-- 移除原来的独立 .brief-subtitle 元素 -->
+    <div class="brief-summary-list" id="briefSummaryList">...</div>
+</div>
+    </div>
+
+<div class="todo-col">
+<div class="todo-card">
+    <div class="card-header">
+        <div class="card-title">
+            <i class="ri-checkbox-circle-line" style="font-size: 20px; color: var(--primary);"></i>
+            待办 <span id="todoCountSpan">5</span>
+        </div>
+        <div class="card-action">全部 →</div>
+    </div>
+    <div class="todo-list-compact" id="todoListRight"></div>
+</div>
+</div>
+</div>
+            </div>
+			
+<div class="recommend-wrapper">
+    <!-- 推荐标题居中 -->
+    <div class="recommend-header">
+        <div class="recommend-title">精准荐读</div>
+        <div class="recommend-subtitle">基于您的订阅与研究行为</div>
+    </div>
+    <!-- 订阅标签栏：居中对齐，右侧放置管理按钮 -->
+<div class="subscription-section">
+    <div class="subscription-bar" id="subscriptionBar"></div>
+    <div class="subscription-manage" id="moreSubscriptionBtn">
+        <i class="ri-settings-3-line"></i> 订阅管理
+    </div>
+</div>
+
+    <!-- 卡片网格 -->
+    <div class="card-grid" id="recommendGrid"></div>
+</div>
+					</div>
+
+        <!-- 情报中心 -->
+        <div id="page-intelligence" class="page">
+            <div class="page-header">
+                <div class="page-header-left">
+                    <h1>🛰️ 情报中心</h1>
+                    <p>汇聚开源内容、专题库、专家报告、实体库、遥感数据等多维情报资源</p>
+                </div>
+                <div class="global-search">
+                    <input type="text" placeholder="情报库内检索...">
+                    <span class="ai-badge">✨ AI</span>
+                </div>
+            </div>
+            <div class="intel-filters">
+                <span class="filter-chip active">全部情报</span>
+                <span class="filter-chip">开源内容</span>
+                <span class="filter-chip">专题内容</span>
+                <span class="filter-chip">专家报告</span>
+                <span class="filter-chip">实体库</span>
+                <span class="filter-chip">人物库</span>
+                <span class="filter-chip">遥感数据</span>
+            </div>
+            <div class="card">
+                <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+                    <div style="flex: 1; padding: 20px; background: var(--bg-body); border-radius: var(--radius-md); border: 1px solid var(--border); text-align: center;">
+                        <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">实体库总量</div>
+                        <div style="font-size: 26px; font-weight: 800; color: var(--primary);">12,458</div>
+                        <div style="font-size: 12px; color: var(--success); margin-top: 4px; font-weight: 600;">↑ 156 本周新增</div>
+                    </div>
+                    <div style="flex: 1; padding: 20px; background: var(--bg-body); border-radius: var(--radius-md); border: 1px solid var(--border); text-align: center;">
+                        <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">人物库总量</div>
+                        <div style="font-size: 26px; font-weight: 800; color: var(--primary);">3,892</div>
+                        <div style="font-size: 12px; color: var(--success); margin-top: 4px; font-weight: 600;">↑ 23 本周新增</div>
+                    </div>
+                    <div style="flex: 1; padding: 20px; background: var(--bg-body); border-radius: var(--radius-md); border: 1px solid var(--border); text-align: center;">
+                        <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">遥感影像归档</div>
+                        <div style="font-size: 26px; font-weight: 800; color: var(--primary);">45.2 TB</div>
+                        <div style="font-size: 12px; color: var(--primary); margin-top: 4px; font-weight: 600;">↑ 2.1TB 本月入库</div>
+                    </div>
+                </div>
+                <table class="trans-table">
+                    <thead>
+                        <tr>
+                            <th>情报标题</th>
+                            <th>类型</th>
+                            <th>信源</th>
+                            <th>入库时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div style="font-weight: 700; color: var(--text-primary);">日本 H3 火箭失败原因技术分析</div>
+                                <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">二级发动机点火异常 | 涉及实体: 三菱重工, JAXA</div>
+                            </td>
+                            <td><span class="status-badge status-progress">专家报告</span></td>
+                            <td>航空宇宙技术研究所</td>
+                            <td>2026-05-18</td>
+                            <td>
+                                <button class="feed-ai-btn" onclick="sendAgentPrompt(&#39;添加到课题库&#39;)">+ 课题库</button>
+                                <button class="feed-ai-btn" style="margin-left: 6px;" onclick="sendAgentPrompt(&#39;提取线索&#39;)">提取线索</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div style="font-weight: 700; color: var(--text-primary);">某国低轨星座第3批卫星发射轨道参数</div>
+                                <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">TLE数据 | 轨道高度: 550km | 倾角: 53°</div>
+                            </td>
+                            <td><span class="status-badge status-done">遥感数据</span></td>
+                            <td>Space-Track</td>
+                            <td>2026-05-17</td>
+                            <td>
+                                <button class="feed-ai-btn" onclick="sendAgentPrompt(&#39;添加到课题库&#39;)">+ 课题库</button>
+                                <button class="feed-ai-btn" style="margin-left: 6px;" onclick="sendAgentPrompt(&#39;轨道分析&#39;)">AI分析</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 研究中心 -->
+        <div id="page-research" class="page">
+            <div class="page-header">
+                <div class="page-header-left">
+                    <h1>🔬 研究中心</h1>
+                    <p>个人及团队研究课题管理，支持内容、线索、观点、报告的全流程协作</p>
+                </div>
+            </div>
+            <div class="dashboard-grid">
+                <div class="card" style="grid-column: span 8;">
+                    <div class="card-header">
+                        <div class="card-title">在研课题</div>
+                        <button class="feed-ai-btn" style="padding: 6px 14px; font-size: 13px;">+ 新建课题</button>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        <div style="padding: 20px; background: var(--bg-body); border-radius: var(--radius-md); border: 1px solid var(--border);">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                                <div>
+                                    <div style="font-size: 15px; font-weight: 800; color: var(--text-primary); margin-bottom: 6px;">可重复使用运载器热防护系统技术路线对比研究</div>
+                                    <div style="font-size: 13px; color: var(--text-muted);">负责人: 张伟 | 协作人: 李芳、王强 | 进度: 65%</div>
+                                </div>
+                                <span class="status-badge status-progress">进行中</span>
+                            </div>
+                            <div style="display: flex; gap: 16px; font-size: 13px; color: var(--text-muted); font-weight: 500;">
+                                <span>📄 内容: 42</span>
+                                <span>🔍 线索: 128</span>
+                                <span>💡 观点: 15</span>
+                                <span>📝 报告: 3</span>
+                            </div>
+                            <div style="margin-top: 12px; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden;">
+                                <div style="width: 65%; height: 100%; background: linear-gradient(90deg, var(--primary), #818CF8);"></div>
+                            </div>
+                        </div>
+                        <div style="padding: 20px; background: var(--bg-body); border-radius: var(--radius-md); border: 1px solid var(--border);">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                                <div>
+                                    <div style="font-size: 15px; font-weight: 800; color: var(--text-primary); margin-bottom: 6px;">低轨卫星星座频谱分配与协调机制研究</div>
+                                    <div style="font-size: 13px; color: var(--text-muted);">负责人: 李芳 | 协作人: 张伟 | 进度: 30%</div>
+                                </div>
+                                <span class="status-badge status-review">开题评审</span>
+                            </div>
+                            <div style="display: flex; gap: 16px; font-size: 13px; color: var(--text-muted); font-weight: 500;">
+                                <span>📄 内容: 18</span>
+                                <span>🔍 线索: 56</span>
+                                <span>💡 观点: 8</span>
+                                <span>📝 报告: 1</span>
+                            </div>
+                            <div style="margin-top: 12px; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden;">
+                                <div style="width: 30%; height: 100%; background: linear-gradient(90deg, var(--primary), #818CF8);"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card" style="grid-column: span 4;">
+                    <div class="card-header">
+                        <div class="card-title">课题动态</div>
+                    </div>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <div style="font-size: 13px; font-weight: 800; color: var(--text-primary);">AI 自动提取 5 条新线索</div>
+                                <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">来自 "NASA 预算报告" 和 "SpaceX 发射动态"</div>
+                                <div style="font-size: 11px; color: var(--text-muted); margin-top: 6px; font-weight: 500;">10分钟前</div>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot" style="border-color: #818CF8;"></div>
+                            <div class="timeline-content">
+                                <div style="font-size: 13px; font-weight: 800; color: var(--text-primary);">王强 上传了研究报告 v2</div>
+                                <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">《热防护材料烧蚀试验数据对比》</div>
+                                <div style="font-size: 11px; color: var(--text-muted); margin-top: 6px; font-weight: 500;">2小时前</div>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot" style="border-color: var(--success);"></div>
+                            <div class="timeline-content">
+                                <div style="font-size: 13px; font-weight: 800; color: var(--text-primary);">课题协作邀请已接受</div>
+                                <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">李芳 加入 "低轨星座频谱" 课题</div>
+                                <div style="font-size: 11px; color: var(--text-muted); margin-top: 6px; font-weight: 500;">昨天</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 翻译中心 -->
+        <div id="page-translation" class="page">
+            <div class="page-header">
+                <div class="page-header-left">
+                    <h1>🌐 翻译中心</h1>
+                    <p>航天航空领域专业翻译任务管理与AI辅助翻译（象胥翻译）</p>
+                </div>
+            </div>
+            <div class="dashboard-grid" style="margin-bottom: 20px;">
+                <div class="card stat-card">
+                    <div class="stat-label">进行中项目</div>
+                    <div class="stat-value">4</div>
+                    <div style="font-size: 12px; color: var(--warning); margin-top: 4px; font-weight: 600;">2个即将到期</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-label">待审校任务</div>
+                    <div class="stat-value">7</div>
+                    <div style="font-size: 12px; color: var(--primary); margin-top: 4px; font-weight: 600;">↑ 3 今日新增</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-label">本月完成字数</div>
+                    <div class="stat-value">45.2万</div>
+                    <div style="font-size: 12px; color: var(--success); margin-top: 4px; font-weight: 600;">↑ 12% 环比</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-label">术语库条目</div>
+                    <div class="stat-value">8,650</div>
+                    <div style="font-size: 12px; color: var(--primary); margin-top: 4px; font-weight: 600;">AI补充 23 条</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">翻译任务列表</div>
+                    <div style="display: flex; gap: 8px;">
+                        <span class="filter-chip active">全部</span>
+                        <span class="filter-chip">待翻译</span>
+                        <span class="filter-chip">审校中</span>
+                        <span class="filter-chip">已完成</span>
+                    </div>
+                </div>
+                <table class="trans-table">
+                    <thead>
+                        <tr>
+                            <th>任务名称</th>
+                            <th>项目</th>
+                            <th>字数</th>
+                            <th>译员</th>
+                            <th>截止日期</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div style="font-weight: 700; color: var(--text-primary);">NASA FY2026 Budget Request Summary</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">英译中 · 航天预算 · 高专业度</div>
+                            </td>
+                            <td>美国航天动态跟踪</td>
+                            <td>12,500</td>
+                            <td>李明</td>
+                            <td>2026-05-20</td>
+                            <td><span class="status-badge status-progress">翻译中</span></td>
+                            <td><button class="feed-ai-btn" onclick="sendAgentPrompt(&#39;象胥翻译&#39;)">象胥辅助</button></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div style="font-weight: 700; color: var(--text-primary);">ESA Ariane 6 技术手册 Chapter 3-4</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">法译中 · 运载火箭 · 技术规范</div>
+                            </td>
+                            <td>欧洲运载器研究</td>
+                            <td>28,000</td>
+                            <td>王芳</td>
+                            <td>2026-05-22</td>
+                            <td><span class="status-badge status-review">审校中</span></td>
+                            <td><button class="feed-ai-btn" onclick="sendAgentPrompt(&#39;术语检查&#39;)">术语检查</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 智能体广场 -->
+        <div id="page-agents" class="page">
+            <div class="page-header">
+                <div class="page-header-left">
+                    <h1>🤖 智能体广场</h1>
+                    <p>发现、创建和配置面向航天航空研判场景的专业AI智能体</p>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                <div class="card" style="padding: 0; overflow: hidden; cursor: pointer; transition: all 0.3s;">
+                    <div style="height: 140px; background: linear-gradient(135deg, #4F46E5, #7C3AED); display: flex; align-items: center; justify-content: center; font-size: 48px;">🛰️</div>
+                    <div style="padding: 20px;">
+                        <div style="font-size: 11px; font-weight: 800; color: var(--primary); margin-bottom: 6px;">官方智能体</div>
+                        <div style="font-size: 16px; font-weight: 800; margin-bottom: 8px;">航天情报分析师</div>
+                        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px;">自动追踪全球航天发射动态，生成每日情报摘要，识别技术突破与战略意图</div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-muted); font-weight: 500;">
+                            <span>使用 1.2k 次</span>
+                            <button class="feed-ai-btn" style="padding: 6px 12px;">添加到工作台</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card" style="padding: 0; overflow: hidden; cursor: pointer; transition: all 0.3s;">
+                    <div style="height: 140px; background: linear-gradient(135deg, #059669, #10B981); display: flex; align-items: center; justify-content: center; font-size: 48px;">🗺️</div>
+                    <div style="padding: 20px;">
+                        <div style="font-size: 11px; font-weight: 800; color: var(--primary); margin-bottom: 6px;">官方智能体</div>
+                        <div style="font-size: 16px; font-weight: 800; margin-bottom: 8px;">遥感影像解译助手</div>
+                        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px;">基于多源遥感数据，自动识别机场、发射场、港口等军事/航天设施变化</div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-muted); font-weight: 500;">
+                            <span>使用 856 次</span>
+                            <button class="feed-ai-btn" style="padding: 6px 12px;">添加到工作台</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card" style="padding: 0; overflow: hidden; cursor: pointer; transition: all 0.3s;">
+                    <div style="height: 140px; background: linear-gradient(135deg, #D97706, #F59E0B); display: flex; align-items: center; justify-content: center; font-size: 48px;">🌐</div>
+                    <div style="padding: 20px;">
+                        <div style="font-size: 11px; font-weight: 800; color: var(--success); margin-bottom: 6px;">用户创建</div>
+                        <div style="font-size: 16px; font-weight: 800; margin-bottom: 8px;">象胥翻译专家</div>
+                        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px;">航天航空领域专业术语翻译与审校，支持英/法/俄/日多语种技术文档</div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-muted); font-weight: 500;">
+                            <span>使用 2.3k 次</span>
+                            <button class="feed-ai-btn" style="padding: 6px 12px;">添加到工作台</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 算力超市 -->
+        <div id="page-compute" class="page">
+            <div class="page-header">
+                <div class="page-header-left">
+                    <h1>⚡ 算力超市</h1>
+                    <p>模型训练、遥感数据处理、大规模文献分析所需的算力资源调度</p>
+                </div>
+            </div>
+            <div class="card" style="text-align: center; padding: 80px 40px;">
+                <div style="font-size: 56px; margin-bottom: 20px;">🚀</div>
+                <div style="font-size: 20px; font-weight: 800; margin-bottom: 10px;">算力资源调度中心</div>
+                <div style="color: var(--text-muted); font-size: 15px; max-width: 500px; margin: 0 auto; line-height: 1.6;">
+                    GPU集群状态监控 · 任务队列管理 · 模型训练日志 · 遥感影像并行处理
+                </div>
+            </div>
+        </div>
+
+        <!-- 数据管理 -->
+        <div id="page-datamgmt" class="page">
+            <div class="page-header">
+                <div class="page-header-left">
+                    <h1>🗃️ 数据管理</h1>
+                    <p>机构内部数据与外部信源数据的统一管理、清洗与血缘追踪</p>
+                </div>
+            </div>
+            <div class="card" style="text-align: center; padding: 80px 40px;">
+                <div style="font-size: 56px; margin-bottom: 20px;">🗄️</div>
+                <div style="font-size: 20px; font-weight: 800; margin-bottom: 10px;">数据资产管理中心</div>
+                <div style="color: var(--text-muted); font-size: 15px; max-width: 500px; margin: 0 auto; line-height: 1.6;">
+                    内部数据库 · 外部API接入 · 数据血缘图谱 · 质量监控仪表盘
+                </div>
+            </div>
+        </div>
+
+        <!-- 系统管理 -->
+        <div id="page-system" class="page">
+            <div class="page-header">
+                <div class="page-header-left">
+                    <h1>⚙️ 系统管理</h1>
+                    <p>团队管理、角色权限、术语库维护与基础配置</p>
+                </div>
+            </div>
+            <div class="dashboard-grid">
+                <div class="card" style="grid-column: span 6;">
+                    <div class="card-header">
+                        <div class="card-title">团队管理</div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <div style="padding: 16px; background: var(--bg-body); border-radius: var(--radius-md); border: 1px solid var(--border); cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor=&#39;var(--primary)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+                            <div style="font-weight: 800; color: var(--text-primary); margin-bottom: 4px;">翻译团队 (8人)</div>
+                            <div style="font-size: 13px; color: var(--text-muted);">项目经理: 2 | 译员: 6</div>
+                        </div>
+                        <div style="padding: 16px; background: var(--bg-body); border-radius: var(--radius-md); border: 1px solid var(--border); cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor=&#39;var(--primary)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+                            <div style="font-weight: 800; color: var(--text-primary); margin-bottom: 4px;">情报分析部门 (15人)</div>
+                            <div style="font-size: 13px; color: var(--text-muted);">研究员: 5 | 分析师: 6 | 策展师: 2 | 信息员: 2</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card" style="grid-column: span 6;">
+                    <div class="card-header">
+                        <div class="card-title">术语管理</div>
+                    </div>
+                    <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+                        <div style="font-size: 40px; margin-bottom: 12px;">📚</div>
+                        <div style="font-size: 18px; font-weight: 800; color: var(--text-primary); margin-bottom: 6px;">已收录术语 8,650 条</div>
+                        <div style="font-size: 13px;">覆盖中/英/法/俄/日/德 6个语种</div>
+                        <button class="feed-ai-btn" style="margin-top: 16px; padding: 8px 16px; font-size: 13px;">术语库维护</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 我的 -->
+        <div id="page-profile" class="page">
+            <div class="page-header">
+                <div class="page-header-left">
+                    <h1>👤 我的</h1>
+                </div>
+            </div>
+            <div class="card" style="max-width: 600px; margin: 0 auto; text-align: center; padding: 48px;">
+                <div style="width: 90px; height: 90px; border-radius: 50%; background: linear-gradient(135deg, #818CF8, var(--primary)); display: flex; align-items: center; justify-content: center; font-size: 36px; color: white; font-weight: 700; margin: 0 auto 20px;">张</div>
+                <div style="font-size: 22px; font-weight: 800; color: var(--text-primary);">张宇航</div>
+                <div style="color: var(--text-muted); margin-top: 6px; font-size: 14px;">高级研究员 | 情报分析部门</div>
+                <div style="display: flex; justify-content: center; gap: 40px; margin-top: 32px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 24px; font-weight: 800; color: var(--primary);">12</div>
+                        <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px; font-weight: 500;">在研课题</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 24px; font-weight: 800; color: var(--primary);">48</div>
+                        <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px; font-weight: 500;">完成报告</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 24px; font-weight: 800; color: var(--primary);">156</div>
+                        <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px; font-weight: 500;">提取线索</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+	
+	let currentNotification = null;
+	
+        // 角色配置
+        const roleConfig = {
+            researcher: {
+                name: '研究员',
+                avatar: '研',
+                tag: '🔬 研究员模式',
+                subtitle: '今日有 3 条新线索待分析，2 份报告待审阅',
+                agents: [
+                    { icon: '🔍', name: '查线索' },
+                    { icon: '📝', name: '写报告' },
+                    { icon: '💡', name: '智能选题' },
+                    { icon: '🧩', name: '观点聚类' }
+                ],
+                myAgents: [
+                    { icon: '🛰️', name: '航天情报分析', desc: '发射动态追踪' },
+                    { icon: '🗺️', name: '遥感解译', desc: '影像变化检测' },
+                    { icon: '📄', name: '报告生成', desc: '开题/研究辅助' }
+                ],
+// 以 researcher 为例
+todo: [
+    { 
+        title: '高超声速飞行器热防护材料最新进展分析', 
+        meta: '今日 18:00', 
+        tag: '线索分析', 
+        priority: 'high',
+        type: '课题研究' 
+    },
+    { 
+        title: 'NASA 2024 Q2 预算报告翻译审校', 
+        meta: '明日 12:00', 
+        tag: '翻译任务', 
+        priority: 'medium',
+        type: '翻译任务' 
+    },
+    { 
+        title: '低轨卫星星座频谱分配情报聚类', 
+        meta: '5月22日', 
+        tag: '课题报告', 
+        priority: 'low',
+        type: '课题研究' 
+    },
+    { 
+        title: '某国新型火箭发动机试车数据研判', 
+        meta: '今日 20:00', 
+        tag: '情报分析', 
+        priority: 'high',
+        type: '数据审核' 
+    }
+],
+sentinel: [
+    { id: 'res_alert1', type: 'alert', label: '🔥 热点预警', desc: 'SpaceX 星舰第4次试飞技术参数更新...', time: '10分钟前 · 自动监测' },
+    { id: 'res_info1', type: 'info', label: '📥 信源更新', desc: 'ESA 发布 2026-2030 技术路线图...', time: '1小时前 · ESA官方' },
+    { id: 'res_tip1', type: 'tip', label: '💡 课题关联', desc: '遥感数据匹配到您的课题...', time: '3小时前 · AI关联引擎' },
+    { id: 'res_alert2', type: 'alert', label: '⚠️ 任务提醒', desc: '翻译项目"欧洲运载器研究"距离截止还剩 18 小时...', time: '30分钟前 · 项目管理系统' },
+    { id: 'res_info2', type: 'info', label: '📊 数据同步', desc: '外部信源"航空周刊"已完成今日增量同步...', time: '2小时前 · 同步系统' }
+],
+                chatWelcome: '您好！我是 MossLib AI 助手。当前处于 <strong>研究员</strong> 模式。<br><br>我可以帮您：<br>• 情报检索与线索提取<br>• 撰写开题/研究报告<br>• 观点聚类与关联分析<br>• 遥感数据解译辅助<br><br>请直接输入需求，或点击下方智能体快捷入口。'
+            },
+            translator: {
+                name: '译员',
+                avatar: '译',
+                tag: '🌐 译员模式',
+                subtitle: '今日有 2 个翻译任务待完成，1 个项目进入审校阶段',
+                agents: [
+                    { icon: '🌐', name: '象胥翻译' },
+                    { icon: '📋', name: '术语提示' },
+                    { icon: '✅', name: '质量检查' },
+                    { icon: '📊', name: '进度跟踪' }
+                ],
+                myAgents: [
+                    { icon: '🌐', name: '象胥翻译', desc: 'AI辅助翻译' },
+                    { icon: '📚', name: '术语管家', desc: '专业术语提示' },
+                    { icon: '✅', name: '审校助手', desc: '一致性检查' }
+                ],
+                todo: [
+                    { title: 'NASA FY2026 Budget Request Summary', meta: '英译中 · 12,500字 · 今日截止', tag: '翻译任务', priority: 'high' },
+                    { title: 'ESA Ariane 6 技术手册 Chapter 3', meta: '法译中 · 审校反馈待处理', tag: '审校任务', priority: 'medium' },
+                    { title: 'JAXA 火箭发动机试验报告', meta: '日译中 · 术语库更新', tag: '翻译任务', priority: 'low' },
+                    { title: 'Roscosmos 年度发射计划综述', meta: '俄译中 · 明日截止', tag: '翻译任务', priority: 'high' }
+                ],
+                sentinel: [
+                    { type: 'info', label: '📚 术语更新', desc: '术语库已自动更新 23 条航天新材料相关术语，建议同步至当前项目', time: '20分钟前 · 术语系统' },
+                    { type: 'alert', label: '⏰ 项目预警', desc: '翻译项目"欧洲运载器研究"距离截止还剩 18 小时', time: '30分钟前 · 项目系统' },
+                    { type: 'tip', label: '💡 AI建议', desc: '检测到"reusable launch vehicle"存在3种译法，建议统一为"可重复使用运载器"', time: '1小时前 · 象胥翻译' },
+                    { type: 'info', label: '📥 新任务分配', desc: '项目经理为您分配了"JAXA试验报告"翻译任务', time: '2小时前 · 翻译管理' }
+                ],
+                chatWelcome: '您好！我是 MossLib AI 助手。当前处于 <strong>译员</strong> 模式。<br><br>我可以帮您：<br>• 象胥智能翻译辅助<br>• 术语一致性检查<br>• 专业领域译文审校<br>• 翻译进度与质量分析<br><br>请直接输入需求，或点击下方智能体快捷入口。'
+            },
+            manager: {
+                name: '管理者',
+                avatar: '管',
+                tag: '📊 管理者模式',
+                subtitle: '情报分析部门本周产出 5 份报告，翻译中心有 2 个项目即将到期',
+                agents: [
+                    { icon: '📊', name: '进度看板' },
+                    { icon: '⚠️', name: '风险预警' },
+                    { icon: '👥', name: '人员负荷' },
+                    { icon: '📈', name: '产出统计' }
+                ],
+                myAgents: [
+                    { icon: '📊', name: '项目总览', desc: '全局进度监控' },
+                    { icon: '👥', name: '团队效能', desc: '人员负荷分析' },
+                    { icon: '⚡', name: '算力调度', desc: '资源分配优化' }
+                ],
+                todo: [
+                    { title: '审批"可重复使用运载器"课题中期报告', meta: '申请人: 张伟 · 今日截止', tag: '审批', priority: 'high' },
+                    { title: '翻译项目"欧洲运载器研究"延期申请', meta: '申请人: 王芳 · 需今日确认', tag: '审批', priority: 'high' },
+                    { title: '情报分析部门月度绩效考核', meta: '截止: 5月25日', tag: '管理', priority: 'medium' },
+                    { title: '新入职研究员系统权限配置', meta: '待处理: 3人', tag: '系统', priority: 'medium' }
+                ],
+                sentinel: [
+                    { type: 'alert', label: '⚠️ 项目风险', desc: '翻译中心有 2 个项目即将超期，建议优先调配审校资源', time: '15分钟前 · 风险监测' },
+                    { type: 'info', label: '📈 产出通报', desc: '情报分析部门本周完成 5 份研究报告，较上周增长 25%', time: '1小时前 · 统计系统' },
+                    { type: 'tip', label: '💡 人员建议', desc: '研究员李芳本周负荷率 92%，建议暂缓分配新课题', time: '2小时前 · 效能分析' },
+                    { type: 'alert', label: '🔒 安全提醒', desc: '检测到 2 个账号存在异常登录行为，建议复核权限', time: '30分钟前 · 安全中心' }
+                ],
+                chatWelcome: '您好！我是 MossLib AI 助手。当前处于 <strong>管理者</strong> 模式。<br><br>我可以帮您：<br>• 全局项目进度监控<br>• 团队效能与风险预警<br>• 资源调配建议<br>• 产出统计与趋势分析<br><br>请直接输入需求，或点击下方智能体快捷入口。'
+            },
+            dataadmin: {
+                name: '数据管理员',
+                avatar: '数',
+                tag: '🗃️ 数据管理员模式',
+                subtitle: '本周新增外部数据源 3 个，实体库更新 156 条，数据质量巡检正常',
+                agents: [
+                    { icon: '🌐', name: '信源接入' },
+                    { icon: '🔗', name: '实体关联' },
+                    { icon: '🧹', name: '数据清洗' },
+                    { icon: '📊', name: '血缘分析' }
+                ],
+                myAgents: [
+                    { icon: '🌐', name: '信源监控', desc: 'API健康检测' },
+                    { icon: '🏢', name: '实体补全', desc: '关系图谱维护' },
+                    { icon: '🧹', name: '质量巡检', desc: '异常数据识别' }
+                ],
+                todo: [
+                    { title: 'Space-Track API 数据源稳定性修复', meta: '优先级: 高 · 影响遥感数据更新', tag: '运维', priority: 'high' },
+                    { title: '人物库"航天工程师"实体关系补全', meta: 'AI推荐补全 45 条关联', tag: '数据治理', priority: 'medium' },
+                    { title: '外部开源情报 RSS 源接入配置', meta: '新增 3 个信源待审核', tag: '接入', priority: 'medium' },
+                    { title: '遥感影像元数据标准化清洗', meta: '待处理: 1.2TB', tag: '清洗', priority: 'low' }
+                ],
+                sentinel: [
+                    { type: 'tip', label: '💡 AI建议', desc: 'AI检测到人物库中"马斯克"实体关联的 12 条新动态尚未入库，建议自动抓取', time: '10分钟前 · 实体监控' },
+                    { type: 'info', label: '📥 数据同步', desc: '外部信源"航空周刊"已完成今日增量同步，新增 23 篇文章', time: '30分钟前 · 同步系统' },
+                    { type: 'alert', label: '⚠️ 质量异常', desc: '遥感数据集"某发射场SAR"存在时间戳异常，建议人工复核', time: '1小时前 · 质量巡检' },
+                    { type: 'info', label: '📊 血缘报告', desc: '本周数据血缘图谱更新完成，新增 156 条实体关系链路', time: '3小时前 · 血缘系统' }
+                ],
+                chatWelcome: '您好！我是 MossLib AI 助手。当前处于 <strong>数据管理员</strong> 模式。<br><br>我可以帮您：<br>• 外部信源接入与监控<br>• 实体关系自动补全<br>• 数据质量异常检测<br>• 血缘图谱分析<br><br>请直接输入需求，或点击下方智能体快捷入口。'
+            },
+            analyst: {
+                name: '分析师',
+                avatar: '析',
+                tag: '📈 分析师模式',
+                subtitle: '今日需完成 2 份专题策展，遥感数据解译队列中有 5 个新任务',
+                agents: [
+                    { icon: '🎯', name: '专题策展' },
+                    { icon: '🛰️', name: '遥感解译' },
+                    { icon: '🔗', name: '实体关联' },
+                    { icon: '📰', name: '情报简报' }
+                ],
+                myAgents: [
+                    { icon: '🎯', name: '专题策展', desc: '情报专题构建' },
+                    { icon: '🛰️', name: '遥感解译', desc: '影像变化检测' },
+                    { icon: '📰', name: '简报生成', desc: 'AI自动策展' }
+                ],
+                todo: [
+                    { title: '某国发射场活动专题策展更新', meta: '新增 3 份遥感影像待关联', tag: '专题策展', priority: 'high' },
+                    { title: '全球低轨星座部署进展月度简报', meta: '截止: 明日 10:00', tag: '情报简报', priority: 'high' },
+                    { title: '实体库"某新型火箭"参数核验', meta: '多源数据交叉验证', tag: '数据核验', priority: 'medium' },
+                    { title: '高超声速武器试验动态跟踪周报', meta: '截止: 5月21日', tag: '跟踪报告', priority: 'medium' }
+                ],
+                sentinel: [
+                    { type: 'alert', label: '🛰️ 遥感预警', desc: '遥感数据解译助手已识别出发射场 2 处新建设施，建议启动专题关联分析', time: '20分钟前 · 遥感系统' },
+                    { type: 'info', label: '📥 专题更新', desc: '您关注的"低轨星座"专题新增 8 条情报，其中 2 条为高置信度', time: '1小时前 · 专题系统' },
+                    { type: 'tip', label: '💡 AI关联', desc: '检测到"某新型火箭"与"热防护材料"课题存在 5 条潜在关联线索', time: '2小时前 · 关联引擎' },
+                    { type: 'info', label: '📰 简报生成', desc: '本周"全球航天发射动态"简报已自动生成，待您审阅发布', time: '3小时前 · 简报系统' }
+                ],
+                chatWelcome: '您好！我是 MossLib AI 助手。当前处于 <strong>分析师</strong> 模式。<br><br>我可以帮您：<br>• 情报专题策展与更新<br>• 遥感影像智能解译<br>• 实体关系深度关联<br>• 情报简报自动生成<br><br>请直接输入需求，或点击下方智能体快捷入口。'
+            }
+        };
+
+        let currentRole = 'researcher';
+
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('collapsed');
+    
+    // 动态切换 Logo 图片
+    const logoImg = document.getElementById('brandLogo');
+    if (sidebar.classList.contains('collapsed')) {
+        // 收起状态：显示图片2（例如 collapsed-logo.png）
+        logoImg.src = 'https://nanaly.oss-cn-beijing.aliyuncs.com/mosslib-v2/img/logo_M.png';   // 替换为您的收起后图片路径
+    } else {
+        // 展开状态：显示图片1（例如 expand-logo.png）
+        logoImg.src = 'https://nanaly.oss-cn-beijing.aliyuncs.com/mosslib-v2/img/logo_00.png';      // 替换为您的展开时图片路径
+    }
+}
+
+        function switchRole(role, event) {
+
+    const fixedDropdown = document.getElementById('sentinelDropdown');
+    if (fixedDropdown) fixedDropdown.classList.remove('sentinel-fixed');
+            event.stopPropagation();
+            currentRole = role;
+            const config = roleConfig[role];
+            
+            document.getElementById('sidebarAvatar').textContent = config.avatar;
+            document.getElementById('sidebarRole').textContent = config.name;
+            
+            document.querySelectorAll('.role-option').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            /* document.getElementById('workspaceRoleTag').textContent = config.tag;
+            document.getElementById('workspaceSubtitle').textContent = config.subtitle;
+            document.getElementById('aiAgentRole').textContent = config.name;
+            
+            // 更新AI快捷入口
+           /* const agentsBar = document.getElementById('aiAgentsBar');
+            agentsBar.innerHTML = config.agents.map(a => 
+                `<div class="agent-pill" onclick="sendAgentPrompt('${a.name}')">${a.icon} ${a.name}</div>`
+            ).join('');
+            
+            // 更新我的智能体
+            const myAgentsRow = document.getElementById('myAgentsRow');
+            const miniCards = config.myAgents.map(a => `
+                <div class="agent-card-mini" onclick="sendAgentPrompt('${a.name}')">
+                    <div class="icon">${a.icon}</div>
+                    <div class="name">${a.name}</div>
+                </div>
+            `).join('');
+            myAgentsRow.innerHTML = miniCards + `
+                <div class="enter-plaza" onclick="navigate('agents')">
+                    <span class="plus">+</span>
+                    <span>更多</span>
+                </div>
+            `;
+			*/
+            
+            // 更新待办
+            const todoList = document.getElementById('todoListRight');
+todoList.innerHTML = config.todo.map(t => `
+    <div class="todo-item-compact">
+        <div class="todo-dot ${t.priority}"></div>
+        <div class="todo-body">
+            <div class="todo-title-compact">${t.title}</div>
+            <div class="todo-meta-compact">
+                <span>${t.meta}</span>
+                <span class="todo-tag-compact">${t.tag}</span>
+                <span class="todo-type-compact">${t.type || '通用'}</span>
+            </div>
+        </div>
+    </div>
+`).join('');
+            
+            // 更新哨兵
+            // const sentinelList = document.getElementById('sentinelList');
+           /* sentinelList.innerHTML = config.sentinel.map(s => `
+                <div class="sentinel-item ${s.type}">
+                    <div class="sentinel-label">${s.label}</div>
+                    <div class="sentinel-desc">${s.desc}</div>
+                    <div class="sentinel-time">${s.time}</div>
+                </div>
+            `).join('');*/
+			
+const todoCount = config.todo.length;
+document.getElementById('todoCount').innerText = todoCount;
+document.getElementById('todoCountSpan').innerText = todoCount;   // 添加这行
+
+// 哨兵新消息数可以模拟动态（例如根据未读条数）
+const sentinelUnread = config.sentinel.filter(s => s.type === 'alert').length;
+document.getElementById('sentinelCount').innerText = sentinelUnread;
+
+renderSentinelDropdown(config.sentinel);
+            
+            // 重置聊天
+            document.getElementById('chatWelcome').classList.remove('hidden');
+            document.getElementById('chatMessages').classList.add('hidden');
+            document.getElementById('chatMessages').innerHTML = '';
+            
+            document.getElementById('roleDropdown').classList.remove('active');
+            document.getElementById('profileCard').classList.remove('active');
+        }
+		
+		// 在 switchRole 内，获取新的哨兵数据 const newSentinel = config.sentinel;
+
+        // 渲染哨兵下拉面板内容
+function renderSentinelDropdown(items) {
+    const dropdown = document.getElementById('sentinelDropdown');
+    if (!dropdown) return;
+    if (!items || items.length === 0) {
+        dropdown.innerHTML = '<div class="dropdown-empty">暂无哨兵消息</div>';
+        return;
+    }
+dropdown.innerHTML = `
+    <div class="dropdown-header">
+        <span>AI 哨兵</span>
+        <div style="display: flex; gap: 8px;">
+            <span id="pinSentinelBtn" style="cursor: pointer; font-size: 14px;" title="固定为悬浮窗">📌</span>
+            <a href="#" id="viewAllSentinel">全部 →</a>
+        </div>
+    </div>
+    ${items.map(item => `
+        <div class="sentinel-dropdown-item" data-type="${item.type}" data-id="${item.id}">
+            <div class="item-title">${item.label}</div>
+            <div class="item-desc">${item.desc}</div>
+            <div class="item-time">${item.time}</div>
+        </div>
+    `).join('')}
+`;
+
+// 绑定固定按钮
+const pinBtn = dropdown.querySelector('#pinSentinelBtn');
+if (pinBtn) {
+    pinBtn.addEventListener('click', () => {
+        // 将下拉面板转为固定模式
+        dropdown.classList.add('sentinel-fixed');
+        dropdown.classList.remove('show'); // 关闭下拉状态
+        // 添加关闭/取消固定按钮（如果还没有）
+        if (!dropdown.querySelector('.unpin-btn')) {
+            const header = dropdown.querySelector('.dropdown-header');
+            const unpin = document.createElement('span');
+            unpin.innerHTML = '✕';
+            unpin.className = 'unpin-btn';
+            unpin.style.cursor = 'pointer';
+            unpin.style.marginLeft = '8px';
+            unpin.title = '取消固定';
+            unpin.addEventListener('click', () => {
+                dropdown.classList.remove('sentinel-fixed');
+                // 可选：重新恢复到原位置，但不自动显示
+                dropdown.classList.remove('show');
+            });
+            header.querySelector('div').appendChild(unpin);
+        }
+    });
+}
+
+
+    // 绑定“全部”按钮事件
+    const viewAll = dropdown.querySelector('#viewAllSentinel');
+    if (viewAll) {
+        viewAll.addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('哨兵详情页开发中，将展示完整预警列表。');
+        });
+    }
+}
+
+
+		function toggleRoleDropdown() {
+            document.getElementById('roleDropdown').classList.toggle('active');
+            document.getElementById('profileCard').classList.toggle('active');
+        }
+
+        function navigate(pageId) {
+		    // 临时处理新页面，后期可替换为真实页面
+const newPages = ['internal-data', 'external-data', 'team-mgmt', 'term-mgmt', 'category-mgmt', 'user-mgmt', 'creation'];
+    if (newPages.includes(pageId)) {
+        alert(`「${pageId}」页面功能开发中，敬请期待。`);
+        return;
+    }
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + pageId).classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            const navMap = {
+                'workspace': 0, 'intelligence': 1, 'research': 2, 'translation': 3,
+                'agents': 4, 'compute': 5, 'datamgmt': 6, 'system': 7, 'profile': 8
+            };
+            const navItems = document.querySelectorAll('.nav-item');
+            if (navItems[navMap[pageId]]) {
+                navItems[navMap[pageId]].classList.add('active');
+            }
+        }
+
+        function focusAiInput() {
+            document.getElementById('mainChatInput').focus();
+        }
+
+        function sendAgentPrompt(prompt) {
+            const input = document.getElementById('mainChatInput');
+            input.value = prompt;
+            sendMainChat();
+        }
+
+// 收藏操作
+function handleCollect(event, id) {
+    event.stopPropagation();
+    alert(`收藏内容 ID: ${id}`);
+    // 实际可调用后端接口，或更新本地存储
+}
+
+// AI阅读（复用原有的 AI 解读功能）
+function handleAIRead(event, id, title) {
+    event.stopPropagation();
+    sendAgentPrompt(`解读：${title}`);
+}
+
+// 更多操作（可扩展分享、引用、举报等）
+function handleMore(event, id) {
+    event.stopPropagation();
+    alert(`更多操作（分享、引用等） ID: ${id}`);
+}
+
+        function sendMainChat() {
+            const input = document.getElementById('mainChatInput');
+            const text = input.value.trim();
+            if (!text) return;
+            
+            const chatBody = document.getElementById('chatMessages');
+            const welcome = document.getElementById('chatWelcome');
+            
+            // 首次发送时切换布局
+            if (!chatBody.classList.contains('hidden') === false) {
+                welcome.classList.add('hidden');
+                chatBody.classList.remove('hidden');
+            }
+            
+            // 用户消息
+            chatBody.innerHTML += `
+                <div class="ai-message-row user">
+                    <div class="ai-avatar user">张</div>
+                    <div class="ai-bubble">${text}</div>
+                </div>
+            `;
+            input.value = '';
+            chatBody.scrollTop = chatBody.scrollHeight;
+            
+            // AI回复
+            setTimeout(() => {
+                chatBody.innerHTML += `
+                    <div class="ai-message-row">
+                        <div class="ai-avatar">✨</div>
+                        <div class="ai-bubble">
+                            已为您启动 <strong>${text}</strong> 智能体...<<br><br>
+                            作为${roleConfig[currentRole].name}，我已理解您的意图。正在调用相关模块和知识库进行处理，请稍候。<br><br>
+                            <span style="color: var(--primary); font-weight: 700; cursor: pointer;" onclick="navigate('research')">→ 查看处理结果</span>
+                        </div>
+                    </div>
+                `;
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }, 600);
+        }
+
+        // 点击外部关闭角色下拉
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.sidebar-footer')) {
+                document.getElementById('roleDropdown').classList.remove('active');
+                document.getElementById('profileCard').classList.remove('active');
+            }
+        });
+		
+
+// ==================== 订阅数据 ====================
+const subscriptions = [
+    { id: 'sub1', title: '高超声速技术', avatarIcon: 'ri-rocket-line', keywords: ['高超声速', '热防护', '超燃冲压'], sources: ['AIAA', 'NASA'] },
+    { id: 'sub2', title: '低轨星座', avatarIcon: 'ri-satellite-line', keywords: ['Starlink', '频谱分配', '星座'], sources: ['SpaceX', 'ESA'] },
+    { id: 'sub3', title: '风能叶片', avatarIcon: 'ri-windy-line', keywords: ['风力涡轮机', '叶片优化', '气动'], sources: ['风能研究与开发'] },
+    { id: 'sub4', title: '遥感解译', avatarIcon: 'ri-radar-line', keywords: ['SAR', '目标检测', '遥感影像'], sources: ['Remote Sensing'] },
+    { id: 'sub5', title: '火箭推进', avatarIcon: 'ri-fire-line', keywords: ['喷管', '推力性能', '火箭发动机'], sources: ['Journal of Propulsion'] }
+];
+// ==================== 推荐内容数据（含订阅关联） ====================
+const recommendItems = [
+    {
+        id: 1,
+        type: '论文',
+    contentType: '论文',
+    confidence: '高',
+        image: null,
+        title: 'Collaborative Optimization of Aerodynamics and Wind Turbine Blades',
+        authors: 'HE Fu-shan, Xingsheng Zheng, Weilin Luo',
+        date: '2025/01/16',
+        country: '瑞士',
+        citations: 66,
+        journal: '风能研究与开发',
+        tags: ['期刊论文', '开放获取', '叶轮机械性能与优化'],
+        abstract: '本文探讨多学科设计优化方法在水平轴风力涡轮机叶片设计中的应用...',
+        relatedSubIds: ['sub3']   // 关联订阅3（风能叶片）
+    },
+    {
+        id: 2,
+        type: '专家研判',
+    contentType: '研判报告',
+    confidence: '高',
+        image: null,
+        title: '低轨星座频谱竞争态势研判（2026 Q1）',
+        authors: '张宇航， 王思远',
+        date: '2026/05/18',
+        country: '中国',
+        citations: null,
+        journal: 'MossLib 航天战略研究室',
+        tags: ['专家报告', '频谱分配', '战略分析'],
+        abstract: '结合最新ITU申报数据和各国星座部署进度，研判未来三年频谱资源争夺关键节点...',
+        relatedSubIds: ['sub2']   // 低轨星座
+    },
+    {
+        id: 3,
+        type: '专利',
+    contentType: '专利',
+    confidence: '高',
+        image: null,
+        title: '一种基于深度学习的遥感图像目标检测方法及系统',
+        authors: '李华， 陈明',
+        date: '2026/04/10',
+        country: '中国',
+        citations: null,
+        journal: 'CN2026XXXXXX',
+        tags: ['发明专利', '遥感智能解译'],
+        abstract: '本发明公开了一种基于改进YOLOv8的遥感目标检测方法，针对小目标检测准确率低的问题...',
+        relatedSubIds: ['sub4']   // 遥感解译
+    },
+    {
+        id: 4,
+        type: '专题合集',
+    contentType: '专题',
+    confidence: '高',
+        image: 'https://picsum.photos/id/20/400/200',
+        title: '高超声速武器防御技术进展合集',
+        authors: 'MossLib 研究中心',
+        date: '2026/05/01',
+        country: '多国',
+        citations: 24,
+        journal: '专题策展',
+        tags: ['专题', '防御技术', '高超声速'],
+        abstract: '本合集收录近半年全球高超声速武器防御领域关键技术文献、试验报告及专家观点...',
+        relatedSubIds: ['sub1']   // 高超声速技术
+    },
+    {
+        id: 5,
+        type: '论文',
+    contentType: '论文',
+    confidence: '中',
+        image: null,
+        title: 'How do differences in airline passengers’ satisfaction with connection modes affect last-mile travel choice?',
+        authors: 'JiangBo Yu, Jiancheng Weng, Tian Wang',
+        date: '2025/01/15',
+        country: '英国',
+        citations: 66,
+        journal: '交通规划与优化',
+        tags: ['期刊论文', '城市交通与可达性'],
+        abstract: '基于随机后悔最小化模型，研究乘客对连接模式的满意度差异如何影响最后一公里出行选择...',
+        relatedSubIds: []      // 无关联订阅（基于行为推荐）
+    },
+    {
+        id: 6,
+        type: '资讯',
+    contentType: '资讯',
+    confidence: '中',
+        image: 'https://picsum.photos/id/3/400/200',
+        title: 'SpaceX 星舰第4次试飞取得关键突破',
+        authors: '路透社',
+        date: '2026/05/19',
+        country: '美国',
+        citations: null,
+        journal: '航天动态',
+        tags: ['资讯', '星舰', '试飞'],
+        abstract: '星舰S29完成轨道级飞行测试，一级超重助推器成功软着陆...',
+        relatedSubIds: ['sub1']   // 高超声速相关（也可关联其他）
+    },
+    {
+        id: 7,
+        type: '论文',
+    contentType: '论文',
+    confidence: '高',
+        image: 'https://picsum.photos/id/104/400/200',
+        title: 'Parametric study on configuration geometry effect on thrust performance of annular expansion deflection nozzle',
+        authors: 'Ge Wang, Jun Zou, Lei Chen',
+        date: '2025/01/15',
+        country: '中国',
+        citations: 66,
+        journal: '计算流体力学与空气动力学',
+        tags: ['期刊论文', '开放获取', '火箭与推进系统'],
+        abstract: '通过数值模拟研究几何参数对环形膨胀偏转喷管推力性能的影响规律...',
+        relatedSubIds: ['sub5']   // 火箭推进
+    },
+	{
+    id: 8,
+    type: '研究报告',
+    contentType: '研究报告',
+    confidence: '高',
+    image: 'https://picsum.photos/id/26/400/200',   // 可替换为真实图片
+    title: 'AGM-183A ARRW高超音速导弹最新试射评估',
+    authors: '美国空军研究实验室',
+    date: '2026/05/10',
+    country: '美国',
+    citations: null,
+    journal: '导弹技术动态',
+    tags: ['高超音速', '空射快速响应武器', '试验评估'],
+    abstract: '分析ARRW第5次全备弹飞行试验数据，重点评估助推器性能、滑翔体热防护及末端精度，相较前次试射，射程提升12%…',
+    relatedSubIds: ['sub1']   // 关联高超声速技术订阅
+},
+{
+    id: 9,
+    type: '技术图谱',
+    contentType: '技术图谱',
+    confidence: '高',
+    image: 'https://picsum.photos/id/105/400/200',
+    title: 'X-47B 舰载无人机关键技术演进图谱',
+    authors: '海军航空系统司令部',
+    date: '2026/04/22',
+    country: '美国',
+    citations: 32,
+    journal: '无人机与自主系统',
+    tags: ['舰载无人机', '自主着舰', '隐身技术'],
+    abstract: '梳理X-47B从2005年概念验证到2015年航母弹射/拦阻试验的技术路线，衍生出MQ-25黄貂鱼加油机及CCA协同作战飞机…',
+    relatedSubIds: []
+},
+{
+    id: 10,
+    type: '资讯',
+    contentType: '资讯',
+    confidence: '低',
+    image: 'https://picsum.photos/id/0/400/200',
+    title: '俄“锆石”高超声速反舰导弹进入战斗值班',
+    authors: '塔斯社',
+    date: '2026/05/18',
+    country: '俄罗斯',
+    citations: null,
+    journal: '防务新闻',
+    tags: ['高超声速', '反舰导弹', '3M22'],
+    abstract: '俄国防部宣布“锆石”正式部署于“戈尔什科夫海军元帅”号护卫舰，射程超1000公里，速度马赫9，可打击水面和地面目标…',
+    relatedSubIds: ['sub1', 'sub5']   // 高超声速+火箭推进
+},
+{
+    id: 11,
+    type: '型号图谱',
+    contentType: '型号图谱',
+    confidence: '高',
+    image: 'https://picsum.photos/id/46/400/200',
+    title: '萨德（THAAD）反导系统部署与拦截记录全览',
+    authors: '导弹防御局',
+    date: '2026/03/15',
+    country: '美国',
+    citations: 18,
+    journal: '防空反导年鉴',
+    tags: ['末段高空防御', '动能拦截器', '实战拦截'],
+    abstract: '汇总2010年至今全球萨德系统部署地点、拦截试验成功率（92%）及实战案例（沙特拦截胡塞武装弹道导弹）…',
+    relatedSubIds: []
+},
+{
+    id: 12,
+    type: '论证报告',
+    contentType: '论证报告',
+    confidence: '中',
+    image: 'https://picsum.photos/id/34/400/200',
+    title: '下一代电子战支援系统（ES-5000）能力框架论证',
+    authors: '洛克希德·马丁',
+    date: '2026/02/28',
+    country: '美国',
+    citations: null,
+    journal: '电子战与信号情报',
+    tags: ['电子攻击', '电子支援', '认知电子战'],
+    abstract: '提出基于AI的威胁信号识别与自适应干扰调制技术，覆盖0.5-40GHz频段，可集成于F-35、无人机及舰载平台…',
+    relatedSubIds: []
+},
+];
+
+// 全局变量
+let activeSubIds = [];      // 当前选中的订阅ID
+let allSubscriptions = subscriptions;
+let allItems = recommendItems;
+
+// 渲染订阅标签栏
+function renderSubscriptionBar() {
+    const bar = document.getElementById('subscriptionBar');
+    if (!bar) return;
+    bar.innerHTML = '';
+
+    const total = allSubscriptions.length;
+    const showCount = 5;        // 超过5个显示“更多”
+    const subsToShow = allSubscriptions.slice(0, showCount);
+    const hasMore = total > showCount;
+
+    subsToShow.forEach(sub => {
+        const tag = createSubTagElement(sub);
+        bar.appendChild(tag);
+    });
+
+    if (hasMore) {
+        // 创建“更多”下拉容器
+        const moreWrapper = document.createElement('div');
+        moreWrapper.className = 'more-dropdown';
+        moreWrapper.innerHTML = `
+            <div class="sub-tag" id="moreSubTrigger">
+                <span class="sub-icon">📋</span> 更多 <span style="font-size: 10px;">▼</span>
+            </div>
+            <div class="dropdown-content" id="moreDropdownContent"></div>
+        `;
+        const dropdownContent = moreWrapper.querySelector('#moreDropdownContent');
+        // 填充剩余订阅
+        const remainingSubs = allSubscriptions.slice(showCount);
+        remainingSubs.forEach(sub => {
+            const tag = createSubTagElement(sub);
+            dropdownContent.appendChild(tag);
+        });
+        bar.appendChild(moreWrapper);
+
+        // 点击更多显示/隐藏下拉
+        const trigger = moreWrapper.querySelector('#moreSubTrigger');
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdownContent.classList.toggle('show');
+        });
+        // 点击页面其他地方关闭下拉
+        document.addEventListener('click', (e) => {
+            if (!moreWrapper.contains(e.target)) {
+                dropdownContent.classList.remove('show');
+            }
+        });
+    }
+}
+
+// 创建单个订阅标签DOM（带未读计数）
+function createSubTagElement(sub) {
+    const tag = document.createElement('div');
+    tag.className = 'sub-tag';
+    if (activeSubIds.includes(sub.id)) tag.classList.add('active');
+    
+    const unreadCount = allItems.filter(item => 
+        item.relatedSubIds && item.relatedSubIds.includes(sub.id)
+    ).length;
+    
+    tag.innerHTML = `
+        <span class="sub-avatar-icon"><i class="${sub.avatarIcon}"></i></span>
+        <span class="sub-title">${sub.title}</span>
+        ${unreadCount > 0 ? `<span class="sub-badge">${unreadCount}</span>` : ''}
+    `;
+    tag.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (activeSubIds.includes(sub.id)) {
+            activeSubIds = activeSubIds.filter(id => id !== sub.id);
+        } else {
+            activeSubIds.push(sub.id);
+        }
+        renderSubscriptionBar();
+        renderRecommendGrid();
+    });
+    return tag;
+}
+
+// 渲染推荐卡片（支持筛选）
+function renderRecommendGrid() {
+    const grid = document.getElementById('recommendGrid');
+    if (!grid) return;
+
+    let filteredItems = allItems;
+    if (activeSubIds.length > 0) {
+        filteredItems = allItems.filter(item => 
+            item.relatedSubIds && item.relatedSubIds.some(subId => activeSubIds.includes(subId))
+        );
+    }
+
+    if (filteredItems.length === 0) {
+        grid.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-muted);">📭 暂无相关推荐，试试其他订阅标签~</div>`;
+        return;
+    }
+
+    // 内容类型颜色映射
+    const contentTypeColors = {
+        '资讯': '#FFF7E6', '论文': '#E6F7FF', '专利': '#F6FFED',
+        '专题': '#F9F0FF', '研究报告': '#FFF0F5', '论证报告': '#E8F8F5',
+        '人物图谱': '#E6F9EC', '型号图谱': '#FEF2E8', '技术图谱': '#E8F0FE'
+    };
+    const confidenceClassMap = {
+        '高': 'confidence-high', '中': 'confidence-mid', '低': 'confidence-low', '未知': 'confidence-unknown'
+    };
+
+    grid.innerHTML = filteredItems.map(item => {
+        // 图片：只有存在且非空时才显示，否则无图片区域
+        const hasImage = item.image && item.image.trim() !== '';
+        const imageHtml = hasImage 
+            ? `<img class="card-image" src="${item.image}" alt="预览图" loading="lazy" onerror="this.src='https://placehold.co/400x200?text=No+Image'">`
+            : '';   // 无图片时不输出任何内容
+
+const citationHtml = item.citations 
+    ? `<span class="citations"><i class="ri-double-quotes-l"></i> ${item.citations} 引用</span>` 
+    : '';
+
+        // 作者截断
+        let authorText = item.authors;
+        if (authorText && authorText.length > 60) authorText = authorText.slice(0, 57) + '...';
+
+        // 订阅标记
+// 订阅标记
+let subBadgesHtml = '';
+if (item.relatedSubIds && item.relatedSubIds.length > 0) {
+    const relatedSubs = allSubscriptions.filter(sub => item.relatedSubIds.includes(sub.id));
+    subBadgesHtml = `<div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px;">` +
+        relatedSubs.map(sub => `<span class="card-sub-badge" data-sub-id="${sub.id}"><i class="${sub.avatarIcon}"></i> ${sub.title}</span>`).join('') +
+        `</div>`;
+}
+        // 类型标签
+        const typeBadgeHtml = `<span class="card-type-badge" style="background: ${contentTypeColors[item.contentType] || '#F0F0F0'};">${item.contentType || '其他'}</span>`;
+        // 置信度标签
+        const confidenceClass = confidenceClassMap[item.confidence] || 'confidence-mid';
+        const confidenceHtml = `<span class="card-confidence-tag ${confidenceClass}">${item.confidence || '未知'}</span>`;
+
+        // 组装卡片
+        return `
+            <div class="recommend-card-item">
+                ${imageHtml}
+                <div class="card-content">
+                    <!-- 第一行：类型 + 置信度 -->
+                    <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
+                        ${typeBadgeHtml}
+                        ${confidenceHtml}
+                    </div>
+                    <!-- 标题 -->
+                    <div class="card-title">
+                        <a href="#">${item.title}</a>
+                    </div>
+                    <!-- 元数据（时间、国家、作者）使用线条图标 -->
+                    <div class="card-meta">
+                        <span><i class="ri-calendar-line"></i> ${item.date}</span>
+                        <span><i class="ri-map-pin-line"></i> ${item.country}</span>
+                        <span><i class="ri-user-line"></i> ${authorText}</span>
+                        ${citationHtml ? `<span>${citationHtml}</span>` : ''}
+                    </div>
+                    <!-- 其他标签 -->
+                    <div class="card-tags">
+                        ${item.tags.map(tag => `<span class="card-tag">${tag}</span>`).join('')}
+                    </div>
+                    <!-- 摘要 -->
+                    <div class="card-abstract">
+                        ${item.abstract}
+                    </div>
+                    ${subBadgesHtml}
+                    <!-- 底部 -->
+<div class="card-footer">
+    <span>📖 ${item.journal}</span>
+    <div class="card-actions">
+        <i class="ri-bookmark-line" title="收藏" onclick="handleCollect(event, '${item.id}')"></i>
+        <i class="ri-message-3-line" title="AI阅读" onclick="handleAIRead(event, '${item.id}', '${item.title}')"></i>
+        <i class="ri-more-2-fill" title="更多" onclick="handleMore(event, '${item.id}')"></i>
+    </div>
+</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    // 绑定卡片内订阅标记的点击事件
+    document.querySelectorAll('.card-sub-badge').forEach(badge => {
+        badge.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const subId = badge.getAttribute('data-sub-id');
+            if (subId && !activeSubIds.includes(subId)) {
+                activeSubIds.push(subId);
+                renderSubscriptionBar();
+                renderRecommendGrid();
+            }
+        });
+    });
+}
+
+// 初始化推荐模块
+function initRecommend() {
+    renderSubscriptionBar();
+    renderRecommendGrid();
+
+    const manageBtn = document.getElementById('moreSubscriptionBtn');
+    if (manageBtn) {
+        manageBtn.addEventListener('click', () => {
+            alert('订阅管理功能开发中：可在此处配置信源、关键词、主题、类型。');
+        });
+    }
+}
+
+// ==================== AI每日简报 ====================
+let briefData = [];  // 存储当前摘要列表
+
+// 模拟生成摘要数据（根据时间范围和订阅筛选）
+function generateBriefData(timeRange, selectedSubIds) {
+    // 模拟异步操作，返回Promise
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            // 根据时间范围模拟不同数量
+            let count = 5;
+            if (timeRange === '3d') count = 8;
+            if (timeRange === '7d') count = 12;
+            // 如果筛选了特定订阅，模拟变化
+            const isFiltered = selectedSubIds.length > 0 && !selectedSubIds.includes('all');
+            const items = [];
+            for (let i = 1; i <= count; i++) {
+                items.push({
+                    id: i,
+                    title: `${isFiltered ? '（基于订阅筛选）' : ''} ${['高超声速技术新进展', '低轨星座部署动态', '遥感影像解译突破', '火箭推进系统优化', '电子战技术演进'][i % 5]}`,
+                    summary: `这是由AI生成的第${i}条摘要内容，基于最近${timeRange === '24h' ? '24小时' : timeRange === '3d' ? '3天' : '7天'}内更新的情报。涉及关键技术点分析、数据对比和趋势预测...`,
+                    source: `来源：${['SpaceX', 'ESA', 'NASA', '国防部', '学术期刊'][i % 5]}`,
+                    date: new Date(Date.now() - i * 3600000).toLocaleString()
+                });
+            }
+            resolve(items);
+        }, 500);
+    });
+}
+
+// 渲染简报列表
+function renderBriefList(items) {
+    const container = document.getElementById('briefSummaryList');
+    if (!container) return;
+    if (!items || items.length === 0) {
+        container.innerHTML = '<div class="brief-empty">暂无摘要，请尝试刷新或调整筛选条件</div>';
+        return;
+    }
+    container.innerHTML = items.map((item, idx) => `
+        <div class="brief-item" data-id="${item.id}">
+            <div class="brief-index">${idx + 1}</div>
+            <div class="brief-content">
+                <div class="brief-title-text" data-id="${item.id}">${item.title}</div>
+                <div class="brief-summary-text">${item.summary}</div>
+                <div class="brief-meta">
+                    <span class="brief-source"><i class="ri-database-line"></i> ${item.source}</span>
+                    <span><i class="ri-time-line"></i> ${item.date}</span>
+                </div>
+            </div>
+        </div>
+    `).join('');
+    // 绑定点击跳转（暂无详情页，仅alert）
+    document.querySelectorAll('.brief-title-text').forEach(el => {
+        el.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const id = el.getAttribute('data-id');
+            alert(`跳转到情报详情页（ID: ${id}），功能开发中。`);
+            // 实际可跳转: window.location.href = `/intelligence/${id}`;
+        });
+    });
+}
+
+// 刷新简报（根据当前选择的筛选条件）
+async function refreshBrief() {
+    const timeRangeSelect = document.getElementById('briefTimeRange');
+    const subFilterSelect = document.getElementById('briefSubFilter');
+    const timeRange = timeRangeSelect ? timeRangeSelect.value : '24h';
+    let selectedSubIds = [];
+    if (subFilterSelect) {
+        const val = subFilterSelect.value;
+        if (val !== 'all') {
+            selectedSubIds = [val];
+        }
+    }
+    // 显示加载中
+    const container = document.getElementById('briefSummaryList');
+    if (container) container.innerHTML = '<div class="brief-loading">🤖 AI正在分析最新情报，请稍候...</div>';
+    
+    const newData = await generateBriefData(timeRange, selectedSubIds);
+    briefData = newData;
+    renderBriefList(briefData);
+}
+
+// 初始化简报（填充订阅筛选下拉）
+function initBrief() {
+    const subFilterSelect = document.getElementById('briefSubFilter');
+    if (subFilterSelect && allSubscriptions) {
+        // 保留“全部订阅”选项，然后添加具体订阅
+        allSubscriptions.forEach(sub => {
+            const option = document.createElement('option');
+            option.value = sub.id;
+            option.textContent = sub.icon + ' ' + sub.title;
+            subFilterSelect.appendChild(option);
+        });
+    }
+    // 绑定刷新按钮
+    const refreshBtn = document.getElementById('briefRefreshBtn');
+    if (refreshBtn) refreshBtn.addEventListener('click', refreshBrief);
+    // 绑定时间范围变化也自动刷新（可选）
+    const timeRangeSelect = document.getElementById('briefTimeRange');
+    if (timeRangeSelect) timeRangeSelect.addEventListener('change', refreshBrief);
+    const subFilterSelectEl = document.getElementById('briefSubFilter');
+    if (subFilterSelectEl) subFilterSelectEl.addEventListener('change', refreshBrief);
+    // 初始加载
+    refreshBrief();
+}
+
+// 页面加载完成后调用
+document.addEventListener('DOMContentLoaded', () => {
+    // 其他初始化函数（如 initRecommend, initBrief 等）保持不变
+    initRecommend();
+    initBrief();
+
+    // 安全调用 switchRole：确保元素存在再操作
+    const activeRoleOption = document.querySelector('.role-option.active');
+    if (activeRoleOption) {
+        switchRole(currentRole, { currentTarget: activeRoleOption, stopPropagation: () => {} });
+    } else {
+        console.warn('未找到激活的角色选项');
+        // 兜底：手动设置一个默认事件对象
+        switchRole(currentRole, { currentTarget: { classList: { add: () => {} } }, stopPropagation: () => {} });
+    }
+
+// ========== 哨兵触发器（简化版，不使用 cloneNode） ==========
+const sentinelTrigger = document.getElementById('sentinelTrigger');
+const sentinelDropdown = document.getElementById('sentinelDropdown');
+
+if (sentinelTrigger && sentinelDropdown) {
+    sentinelTrigger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        console.log('哨兵触发器被点击');
+        if (sentinelDropdown.classList.contains('show')) {
+            sentinelDropdown.classList.remove('show');
+            console.log('面板关闭');
+        } else {
+            sentinelDropdown.classList.add('show');
+            console.log('面板打开');
+        }
+    });
+    
+    // 全局点击关闭面板
+    document.addEventListener('click', function(e) {
+        if (!sentinelTrigger.contains(e.target) && !sentinelDropdown.contains(e.target)) {
+            if (sentinelDropdown.classList.contains('show')) {
+                sentinelDropdown.classList.remove('show');
+                console.log('全局关闭面板');
+            }
+        }
+    });
+} else {
+    console.error('哨兵元素未找到');
+}
+});
+
+
+let notifAutoCloseTimer = null;
+
+function showNewMessageNotification(msg) {
+    if (currentNotification && document.body.contains(currentNotification)) {
+        closeNotificationImmediately(currentNotification);
+    }
+    
+    let autoTimer = null;
+    
+    function closeNotification(element) {
+        if (autoTimer) clearTimeout(autoTimer);
+        element.classList.remove('show');
+        setTimeout(() => {
+            if (element.parentNode) element.remove();
+            if (currentNotification === element) currentNotification = null;
+        }, 300);
+    }
+    
+    function closeNotificationImmediately(element) {
+        if (autoTimer) clearTimeout(autoTimer);
+        element.classList.remove('show');
+        if (element.parentNode) element.remove();
+        if (currentNotification === element) currentNotification = null;
+    }
+    
+    const notif = document.createElement('div');
+    notif.className = 'sentinel-notification';
+    notif.dataset.msgId = msg.id;
+    notif.innerHTML = `
+        <div class="notif-content">
+            <div class="notif-title">
+                AI 哨兵
+                <span class="notif-time" style="margin-left: 8px; font-weight: normal;">${msg.time}</span>
+            </div>
+            <div class="notif-desc">${msg.label}：${msg.desc.substring(0, 80)}${msg.desc.length > 80 ? '…' : ''}</div>
+        </div>
+        <div class="notif-close">✕</div>
+    `;
+    document.body.appendChild(notif);
+    currentNotification = notif;
+    
+    setTimeout(() => notif.classList.add('show'), 10);
+    
+    const closeBtn = notif.querySelector('.notif-close');
+    closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeNotification(notif);
+    });
+    
+    autoTimer = setTimeout(() => {
+        closeNotification(notif);
+    }, 30000);
+    
+    notif.addEventListener('mouseenter', () => {
+        if (autoTimer) {
+            clearTimeout(autoTimer);
+            autoTimer = null;
+        }
+    });
+    
+    notif.addEventListener('mouseleave', () => {
+        if (!autoTimer && document.body.contains(notif)) {
+            autoTimer = setTimeout(() => {
+                closeNotification(notif);
+            }, 30000);
+        }
+    });
+    
+notif.addEventListener('click', (e) => {
+    e.stopPropagation();  // 阻止冒泡，防止全局关闭逻辑干扰
+    if (e.target.classList.contains('notif-close')) return;
+    const dropdown = document.getElementById('sentinelDropdown');
+    if (dropdown) {
+        dropdown.classList.add('show');
+    }
+    setTimeout(() => {
+        const targetItem = dropdown.querySelector(`.sentinel-dropdown-item[data-id="${msg.id}"]`);
+        if (targetItem) {
+            targetItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            targetItem.style.backgroundColor = 'var(--primary-light)';
+            setTimeout(() => { targetItem.style.backgroundColor = ''; }, 2000);
+        } else {
+            // 降级匹配：根据描述前40个字符
+            const items = dropdown.querySelectorAll('.sentinel-dropdown-item');
+            for (let item of items) {
+                const descSpan = item.querySelector('.item-desc');
+                if (descSpan && descSpan.innerText.includes(msg.desc.substring(0, 40))) {
+                    item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    item.style.backgroundColor = 'var(--primary-light)';
+                    setTimeout(() => { item.style.backgroundColor = ''; }, 2000);
+                    break;
+                }
+            }
+        }
+    }, 150);
+    closeNotification(notif);
+});
+}
+
+// ==================== 随机模拟哨兵新消息（每3~10秒） ====================
+let simulationTimer = null;
+
+// 生成随机间隔（毫秒）
+function getRandomDelay() {
+    return Math.floor(Math.random() * (10000 - 3000 + 1) + 3000);
+}
+
+// 生成一条模拟的哨兵消息
+function generateMockSentinel() {
+    const types = ['alert', 'info', 'tip'];
+    const labels = ['🔥 实时监控', '📡 智能扫描', '💡 线索发现', '⚠️ 系统预警', '📊 数据波动'];
+    const type = types[Math.floor(Math.random() * types.length)];
+    const label = labels[Math.floor(Math.random() * labels.length)];
+    const desc = `模拟高价值线索：${Math.random().toString(36).substring(2, 10)}... 请及时研判。`;
+    return {
+        id: Date.now() + '-' + Math.random().toString(36).substring(2, 6), // 唯一ID
+        type: type,
+        label: label,
+        desc: desc,
+        time: new Date().toLocaleTimeString() + ' · 模拟系统'
+    };
+}
+
+// 递归调度随机消息（保证每次间隔随机）
+function scheduleRandomMessage() {
+    const delay = getRandomDelay();
+    simulationTimer = setTimeout(() => {
+        const config = roleConfig[currentRole];
+        if (config && config.sentinel) {
+            const newMsg = generateMockSentinel();
+            config.sentinel.unshift(newMsg);
+            if (config.sentinel.length > 10) config.sentinel.pop();
+            // 重新渲染下拉面板
+            renderSentinelDropdown(config.sentinel);
+            // 直接显示通知（传入新消息对象）
+            showNewMessageNotification(newMsg);
+            // 更新哨兵计数
+            const sentinelUnread = config.sentinel.filter(s => s.type === 'alert').length;
+            document.getElementById('sentinelCount').innerText = sentinelUnread;
+        }
+        scheduleRandomMessage();
+    }, delay);
+}
+
+// 启动模拟（默认开启，如需停止可调用 clearTimeout(simulationTimer)）
+function startRandomSimulation() {
+    if (simulationTimer) clearTimeout(simulationTimer);
+    scheduleRandomMessage();
+}
+
+// 停止模拟（可在控制台执行 stopRandomSimulation()）
+function stopRandomSimulation() {
+    if (simulationTimer) {
+        clearTimeout(simulationTimer);
+        simulationTimer = null;
+        console.log('已停止随机哨兵消息模拟');
+    }
+}
+
+// 页面加载后自动启动（放在 DOMContentLoaded 末尾，确保角色数据已就绪）
+// 注意：原 DOMContentLoaded 中已有初始化，我们在这里追加启动代码
+// 为避免重复，直接调用 startRandomSimulation()
+document.addEventListener('DOMContentLoaded', () => {
+    startRandomSimulation();
+});
+
+function toggleSentinelPanel(e) {
+    e.stopPropagation();
+    const dropdown = document.getElementById('sentinelDropdown');
+    if (dropdown) dropdown.classList.toggle('show');
+}
+		
+		
+    </script>
+
+</div></div></div></main></body></html>
