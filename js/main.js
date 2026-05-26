@@ -90,11 +90,10 @@ function navigate(pageId) {
         }
     });
 
-    // 控制待办和哨兵的显示/隐藏：仅在工作台及其子页面展示
+    // 控制待办和哨兵的显示/隐藏：仅在工作台页面展示
     const globalToolbar = document.querySelector('.global-toolbar');
-    const workspacePages = ['workspace', 'intelligence', 'research', 'topic-lib', 'clue-pool', 'creation', 'translation', 'agents', 'compute'];
     if (globalToolbar) {
-        if (workspacePages.includes(pageId)) {
+        if (pageId === 'workspace') {
             globalToolbar.style.display = '';
         } else {
             globalToolbar.style.display = 'none';
