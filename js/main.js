@@ -89,6 +89,17 @@ function navigate(pageId) {
             item.classList.add('active');
         }
     });
+
+    // 控制待办和哨兵的显示/隐藏：仅在工作台及其子页面展示
+    const globalToolbar = document.querySelector('.global-toolbar');
+    const workspacePages = ['workspace', 'intelligence', 'research', 'topic-lib', 'clue-pool', 'creation', 'translation', 'agents', 'compute'];
+    if (globalToolbar) {
+        if (workspacePages.includes(pageId)) {
+            globalToolbar.style.display = '';
+        } else {
+            globalToolbar.style.display = 'none';
+        }
+    }
 }
 
 function focusAiInput() {
@@ -141,6 +152,12 @@ function openChatFullscreen(initialText) {
     // 显示全屏页面
     fullscreen.classList.add('active');
 
+    // 隐藏待办和哨兵（AI对话页不展示）
+    const globalToolbar = document.querySelector('.global-toolbar');
+    if (globalToolbar) {
+        globalToolbar.style.display = 'none';
+    }
+
     // 清空旧消息
     messages.innerHTML = '';
 
@@ -182,6 +199,12 @@ function backToWorkspace() {
     // 恢复content滚动
     if (content) {
         content.style.overflow = '';
+    }
+
+    // 恢复待办和哨兵显示（回到工作台页面）
+    const globalToolbar = document.querySelector('.global-toolbar');
+    if (globalToolbar) {
+        globalToolbar.style.display = '';
     }
 }
 
