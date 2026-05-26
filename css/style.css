@@ -3223,6 +3223,11 @@ body {
 
 .intelligence-container {
     max-width: 1200px;
+    padding: 0 24px;
+}
+
+#page-intelligence.page {
+    padding: 24px 32px;
 }
 
 /* 情报中心头部 */
