@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MossLib 研判平台</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90' fill='%23605CE5'>✧</text></svg>">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- 左侧导航 -->
+    <aside class="sidebar" id="sidebar">
+        <!-- 顶部标题行 -->
+<div class="sidebar-brand">
+    <img id="brandLogo" class="brand-logo" src="https://nanaly.oss-cn-beijing.aliyuncs.com/mosslib-v2/img/logo_00.png" alt="MossLib">
+    <div class="collapse-btn" onclick="toggleSidebar()">◀</div>
+</div>
+
+        <!-- 中部导航菜单 -->
+<div class="sidebar-nav">
+    <div class="nav-section">
+        <div class="nav-title">工作空间</div>
+        <div class="nav-item active" onclick="navigate('workspace')">
+            <i class="ri-home-line icon"></i>
+            <span class="label">工作台</span>
+            <span class="badge">5</span>
+        </div>
+        <div class="nav-item" onclick="navigate('creation')">
+            <i class="ri-quill-pen-line icon"></i>
+            <span class="label">创作中心</span>
+        </div>
+        <div class="nav-item" onclick="navigate('translation')">
+            <i class="ri-translate icon"></i>
+            <span class="label">翻译中心</span>
+        </div>
+    </div>
+    <div class="nav-section">
+        <div class="nav-title">研究空间</div>
+        <div class="nav-item" onclick="navigate('intelligence')">
+            <i class="ri-global-line icon"></i>
+            <span class="label">情报中心</span>
+        </div>
+        <div class="nav-item" onclick="navigate('research')">
+            <i class="ri-flask-line icon"></i>
+            <span class="label">课题研究</span>
+        </div>
+        <div class="nav-item" onclick="navigate('topic-lib')">
+            <i class="ri-folder-5-line icon"></i>
+            <span class="label">专题库</span>
+        </div>
+        <div class="nav-item" onclick="navigate('clue-pool')">
+            <i class="ri-lightbulb-line icon"></i>
+            <span class="label">线索池</span>
+        </div>
+    </div>
+    <div class="nav-section">
+        <div class="nav-title">AI 赋能</div>
+        <div class="nav-item" onclick="navigate('agents')">
+            <i class="ri-robot-line icon"></i>
+            <span class="label">智能体广场</span>
+        </div>
+        <div class="nav-item" onclick="navigate('compute')">
+            <i class="ri-cpu-line icon"></i>
+            <span class="label">算力超市</span>
+        </div>
+    </div>
+
+<!-- 数据管理 -->
+<div class="nav-section">
+    <div class="nav-title">数据管理</div>
+    <div class="nav-item" onclick="navigate('internal-data')">
+        <i class="ri-database-line icon"></i>
+        <span class="label">内部数据</span>
+    </div>
+    <div class="nav-item" onclick="navigate('external-data')">
+        <i class="ri-cloud-line icon"></i>
+        <span class="label">外部数据</span>
+    </div>
+</div>
+
+<!-- 协同管理 -->
+<div class="nav-section">
+    <div class="nav-title">协同管理</div>
+    <div class="nav-item" onclick="navigate('user-mgmt')">
+        <i class="ri-user-line icon"></i>
+        <span class="label">用户与角色</span>
+    </div>
+    <div class="nav-item" onclick="navigate('team-mgmt')">
+        <i class="ri-team-line icon"></i>
+        <span class="label">团队管理</span>
+    </div>
+    <div class="nav-item" onclick="navigate('term-mgmt')">
+        <i class="ri-book-open-line icon"></i>
+        <span class="label">术语管理</span>
+    </div>
+    <div class="nav-item" onclick="navigate('category-mgmt')">
+        <i class="ri-price-tag-3-line icon"></i>
+        <span class="label">类别管理</span>
+    </div>
+    <div class="nav-item" onclick="navigate('category-mgmt')">
+        <i class="ri-price-tag-3-line icon"></i>
+        <span class="label">系统设置</span>
+    </div>
+
+</div>
+</div>
+
+        <!-- 底部个人中心 -->
+        <div class="sidebar-footer">
+            <div class="profile-card" id="profileCard" onclick="toggleRoleDropdown()">
+                <div class="profile-avatar" id="sidebarAvatar">研</div>
+                <div class="profile-info">
+                    <div class="profile-name">张宇航</div>
+                    <div class="profile-role" id="sidebarRole">研究员</div>
+                </div>
+                <span class="profile-arrow">▼</span>
+            </div>
+
+            <!-- 角色下拉菜单 -->
+            <div class="role-dropdown" id="roleDropdown">
+                <div class="role-option active" onclick="switchRole('researcher', event)">
+                    <span style="font-size: 14px;">🔬</span> 研究员
+                </div>
+                <div class="role-option" onclick="switchRole('translator', event)">
+                    <span style="font-size: 14px;">🌐</span> 译员
+                </div>
+                <div class="role-option" onclick="switchRole('manager', event)">
+                    <span style="font-size: 14px;">📊</span> 管理者
+                </div>
+                <div class="role-option" onclick="switchRole('dataadmin', event)">
+                    <span style="font-size: 14px;">🗃️</span> 数据管理员
+                </div>
+                <div class="role-option" onclick="switchRole('analyst', event)">
+                    <span style="font-size: 14px;">📈</span> 分析师
+                </div>
+            </div>
+        </div>
+    </aside>
+
+<div class="global-toolbar">
+    <div class="toolbar-tag" id="globalTodoTag">
+        <i class="ri-checkbox-circle-line"></i> 待办 <span class="badge" id="todoCount">5</span>
+    </div>
+    <!-- 哨兵触发器 -->
+<div class="toolbar-tag" id="sentinelTrigger" onclick="toggleSentinelPanel(event)">
+    <i class="ri-alert-line"></i> AI 哨兵 <span class="badge" id="sentinelCount">3</span>
+</div>
+    <!-- 哨兵下拉面板 -->
+    <div class="sentinel-dropdown" id="sentinelDropdown"></div>
+</div>
+
+    <!-- 右侧主体 -->
+    <main class="content">
+
+
+        
+        <!-- 个人工作中心（默认页） -->
+        <div id="page-workspace" class="page active">
+
+            <!-- 工作台左右布局 -->
+            <div class="workspace-chat">
+                
+                <!-- 左侧 65% -->
+                <div class="workspace-sub">
+                    
+                    <!-- 1. AI对话区 - 大输入框 -->
+                    <div class="card-chat ai-chat-main">
+                         <!-- 欢迎语 -->
+                        <div class="title-main" id="titleMain">
+                            <h2>MossLib 多语内容服务与信息决策平台</h2>
+                        </div>
+                        <!-- 消息区域（默认隐藏，对话后显示） -->
+                        <div class="ai-chat-messages hidden" id="chatMessages"></div>
+
+                        <!-- 大输入框 -->
+                        <div class="ai-input-large-wrap">
+
+    <div class="input-title-bar">
+    <div class="title-left">
+    <span style="padding-top:3px;"><i class="ri-chat-smile-line"></i></span>
+        <span>智能情报研判助手</span>
+</div>
+<i class="ri-history-line history-btn" title="历史记录"></i>
+    </div>
+
+                            <textarea class="ai-input-large" id="mainChatInput" placeholder="帮你查信息、写报告、翻译文档，也可以随便问我点什么" rows="2" onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();sendMainChat();}"></textarea>
+                            <div class="ai-input-tools">
+                                <div class="ai-tools-left">
+                                    <div class="ai-tool-btn active" title="深度思考" id="thinkBtn" onclick="toggleToolBtn(this)">
+                                        <i class="ri-lightbulb-line ai-tool-icon"></i>
+                                        <span>思考</span>
+                                    </div>
+                                    <div class="ai-tool-btn" title="联网搜索" id="webBtn" onclick="toggleToolBtn(this)">
+                                        <i class="ri-global-line ai-tool-icon"></i>
+                                        <span>联网</span>
+                                    </div>
+                                    <div class="ai-tool-btn ai-datasource-btn" title="数据源" id="datasourceBtn" onclick="toggleDatasourceDropdown(event)">
+                                        <i class="ri-database-2-line ai-tool-icon"></i>
+                                        <span class="ai-datasource-text">数据源</span>
+                                        <i class="ri-arrow-down-s-line" style="font-size:10px;margin-left:2px;"></i>
+                                    </div>
+                                    <div class="ai-datasource-dropdown" id="datasourceDropdown">
+                                        <div class="ai-ds-group">
+                                            <div class="ai-ds-group-title">公共库</div>
+                                            <label class="ai-ds-option">
+                                                <input type="checkbox" value="mosslib" onchange="updateDatasourceSelection()">
+                                                <span>MossLib库</span>
+                                            </label>
+                                        </div>
+                                        <div class="ai-ds-group">
+                                            <div class="ai-ds-group-title">个人知识库</div>
+                                            <label class="ai-ds-option">
+                                                <input type="checkbox" value="personal1" onchange="updateDatasourceSelection()">
+                                                <span>高超声速技术</span>
+                                            </label>
+                                            <label class="ai-ds-option">
+                                                <input type="checkbox" value="personal2" onchange="updateDatasourceSelection()">
+                                                <span>低轨星座</span>
+                                            </label>
+                                            <label class="ai-ds-option">
+                                                <input type="checkbox" value="personal3" onchange="updateDatasourceSelection()">
+                                                <span>遥感解译</span>
+                                            </label>
+                                            <label class="ai-ds-option">
+                                                <input type="checkbox" value="personal4" onchange="updateDatasourceSelection()">
+                                                <span>火箭推进</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="ai-tools-right">
+                                    <div class="ai-tool-btn" title="附件" onclick="uploadAttachment()">
+                                        <i class="ri-attachment-line ai-tool-icon"></i>
+                                    </div>
+                                    <button class="ai-send-round" id="sendBtn" onclick="sendMainChat()">
+                                        <i class="ri-send-plane-fill"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 快捷功能按钮 -->
+<div class="ai-shortcuts" id="aiShortcuts">
+    <div class="shortcut-btn" onclick="sendAgentPrompt('查线索')">
+        <i class="ri-search-fill icon"></i>
+        <span>查线索</span>
+    </div>
+    <div class="shortcut-btn" onclick="sendAgentPrompt('写报告')">
+        <i class="ri-file-text-fill icon"></i>
+        <span>写报告</span>
+    </div>
+    <div class="shortcut-btn" onclick="sendAgentPrompt('智能选题')">
+        <i class="ri-lightbulb-fill icon"></i>
+        <span>智能选题</span>
+    </div>
+    <div class="shortcut-btn" onclick="sendAgentPrompt('观点聚类')">
+        <i class="ri-group-fill icon"></i>
+        <span>观点聚类</span>
+    </div>
+    <div class="shortcut-btn" onclick="sendAgentPrompt('象胥翻译')">
+        <i class="ri-global-fill icon"></i>
+        <span>象胥翻译</span>
+    </div>
+    <div class="shortcut-btn" onclick="sendAgentPrompt('更多')">
+        <span class="plus">+</span>
+        <span>更多</span>
+    </div>
+</div>
+                    </div>
+                    
+                </div>
+
+                <!-- 右侧 35% -->
+                
+            </div>
+        <div class="workspace-layout">
+               
+
+
+<!-- 新增左右布局容器 -->
+<div class="daily-todo-row">
+    <!-- 左侧：AI日报 -->
+    <div class="daily-brief-col">
+        <!-- AI 日报 -->
+<div class="ai-daily-brief">
+    <div class="brief-header">
+        <div class="brief-title-wrapper">
+            <div class="brief-title">
+                <i class="ri-newspaper-line"></i> AI 日报
+            </div>
+            <span class="brief-subtitle inline">基于您的订阅智能生成</span>
+        </div>
+        <div class="brief-controls">
+            <select id="briefTimeRange" class="brief-select">                
+<option value="24h" selected>最近24小时</option>
+                <option value="3d">最近3天</option>
+                <option value="7d">最近7天</option></select>
+            <select id="briefSubFilter" class="brief-select">
+                <option value="all" selected>全部订阅</option>
+            </select>
+             <button id="briefRefreshBtn" class="brief-refresh-btn">
+                <i class="ri-refresh-line"></i> 
+            </button>
+        </div>
+    </div>
+    <!-- 移除原来的独立 .brief-subtitle 元素 -->
+    <div class="brief-summary-list" id="briefSummaryList">...</div>
+</div>
+    </div>
+
+<div class="todo-col">
+<div class="todo-card">
+    <div class="card-header">
+        <div class="card-title">
+            <i class="ri-checkbox-circle-line" style="font-size: 20px; color: var(--primary);"></i>
+            待办 <span id="todoCountSpan">5</span>
+        </div>
+        <div class="card-action">全部 →</div>
+    </div>
+    <div class="todo-list-compact" id="todoListRight"></div>
+</div>
+</div>
+</div>
+            </div>
+			
+<div class="recommend-wrapper">
+    <!-- 推荐标题居中 -->
+    <div class="recommend-header">
+        <div class="recommend-title">精准荐读</div>
+        <div class="recommend-subtitle">基于您的订阅与研究行为</div>
+    </div>
+    <!-- 订阅标签栏：居中对齐，右侧放置管理按钮 -->
+<div class="subscription-section">
+    <div class="subscription-bar" id="subscriptionBar"></div>
+    <div class="subscription-manage" id="moreSubscriptionBtn">
+        <i class="ri-settings-3-line"></i> 订阅管理
+    </div>
+</div>
+
+    <!-- 卡片网格 -->
+    <div class="card-grid" id="recommendGrid"></div>
+</div>
+					</div>
+
+        <!-- 情报中心 -->
+        <div id="page-intelligence" class="page">
+            <div class="page-header">
+                <div class="page-header-left">
+                    <h1>🛰️ 情报中心</h1>
+                    <p>汇聚开源内容、专题库、专家报告、实体库、遥感数据等多维情报资源</p>
+                </div>
+                <div class="global-search">
+                    <input type="text" placeholder="情报库内检索...">
+                    <span class="ai-badge">✨ AI</span>
+                </div>
+            </div>
+            <div class="intel-filters">
+                <span class="filter-chip active">全部情报</span>
+                <span class="filter-chip">开源内容</span>
+                <span class="filter-chip">专题内容</span>
+                <span class="filter-chip">专家报告</span>
+                <span class="filter-chip">实体库</span>
+                <span class="filter-chip">人物库</span>
+                <span class="filter-chip">遥感数据</span>
+            </div>
+            <div class="card">
+                <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+                    <div style="flex: 1; padding: 20px; background: var(--bg-body); border-radius: var(--radius-md); border: 1px solid var(--border); text-align: center;">
+                        <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">实体库总量</div>
+                        <div style="font-size: 26px; font-weight: 800; color: var(--primary);">12,458</div>
+                        <div style="font-size: 12px; color: var(--success); margin-top: 4px; font-weight: 600;">↑ 156 本周新增</div>
+                    </div>
+                    <div style="flex: 1; padding: 20px; background: var(--bg-body); border-radius: var(--radius-md); border: 1px solid var(--border); text-align: center;">
+                        <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">人物库总量</div>
+                        <div style="font-size: 26px; font-weight: 800; color: var(--primary);">3,892</div>
+                        <div style="font-size: 12px; color: var(--success); margin-top: 4px; font-weight: 600;">↑ 23 本周新增</div>
+                    </div>
+                    <div style="flex: 1; padding: 20px; background: var(--bg-body); border-radius: var(--radius-md); border: 1px solid var(--border); text-align: center;">
+                        <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">遥感影像归档</div>
+                        <div style="font-size: 26px; font-weight: 800; color: var(--primary);">45.2 TB</div>
+                        <div style="font-size: 12px; color: var(--primary); margin-top: 4px; font-weight: 600;">↑ 2.1TB 本月入库</div>
+                    </div>
+                </div>
+                <table class="trans-table">
+                    <thead>
+                        <tr>
+                            <th>情报标题</th>
+                            <th>类型</th>
+                            <th>信源</th>
+                            <th>入库时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div style="font-weight: 700; color: var(--text-primary);">日本 H3 火箭失败原因技术分析</div>
+                                <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">二级发动机点火异常 | 涉及实体: 三菱重工, JAXA</div>
+                            </td>
+                            <td><span class="status-badge status-progress">专家报告</span></td>
+                            <td>航空宇宙技术研究所</td>
+                            <td>2026-05-18</td>
+                            <td>
+                                <button class="feed-ai-btn" onclick="sendAgentPrompt('添加到课题库')">+ 课题库</button>
+                                <button class="feed-ai-btn" style="margin-left: 6px;" onclick="sendAgentPrompt('提取线索')">提取线索</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div style="font-weight: 700; color: var(--text-primary);">某国低轨星座第3批卫星发射轨道参数</div>
+                                <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">TLE数据 | 轨道高度: 550km | 倾角: 53°</div>
+                            </td>
+                            <td><span class="status-badge status-done">遥感数据</span></td>
+                            <td>Space-Track</td>
+                            <td>2026-05-17</td>
+                            <td>
+                                <button class="feed-ai-btn" onclick="sendAgentPrompt('添加到课题库')">+ 课题库</button>
+                                <button class="feed-ai-btn" style="margin-left: 6px;" onclick="sendAgentPrompt('轨道分析')">AI分析</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 研究中心 -->
+        <div id="page-research" class="page">
+            <div class="page-header">
+                <div class="page-header-left">
+                    <h1>🔬 研究中心</h1>
+                    <p>个人及团队研究课题管理，支持内容、线索、观点、报告的全流程协作</p>
+                </div>
+            </div>
+            <div class="dashboard-grid">
+                <div class="card" style="grid-column: span 8;">
+                    <div class="card-header">
+                        <div class="card-title">在研课题</div>
+                        <button class="feed-ai-btn" style="padding: 6px 14px; font-size: 13px;">+ 新建课题</button>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        <div style="padding: 20px; background: var(--bg-body); border-radius: var(--radius-md); border: 1px solid var(--border);">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                                <div>
+                                    <div style="font-size: 15px; font-weight: 800; color: var(--text-primary); margin-bottom: 6px;">可重复使用运载器热防护系统技术路线对比研究</div>
+                                    <div style="font-size: 13px; color: var(--text-muted);">负责人: 张伟 | 协作人: 李芳、王强 | 进度: 65%</div>
+                                </div>
+                                <span class="status-badge status-progress">进行中</span>
+                            </div>
+                            <div style="display: flex; gap: 16px; font-size: 13px; color: var(--text-muted); font-weight: 500;">
+                                <span>📄 内容: 42</span>
+                                <span>🔍 线索: 128</span>
+                                <span>💡 观点: 15</span>
+                                <span>📝 报告: 3</span>
+                            </div>
+                            <div style="margin-top: 12px; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden;">
+                                <div style="width: 65%; height: 100%; background: linear-gradient(90deg, var(--primary), #818CF8);"></div>
+                            </div>
+                        </div>
+                        <div style="padding: 20px; background: var(--bg-body); border-radius: var(--radius-md); border: 1px solid var(--border);">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                                <div>
+                                    <div style="font-size: 15px; font-weight: 800; color: var(--text-primary); margin-bottom: 6px;">低轨卫星星座频谱分配与协调机制研究</div>
+                                    <div style="font-size: 13px; color: var(--text-muted);">负责人: 李芳 | 协作人: 张伟 | 进度: 30%</div>
+                                </div>
+                                <span class="status-badge status-review">开题评审</span>
+                            </div>
+                            <div style="display: flex; gap: 16px; font-size: 13px; color: var(--text-muted); font-weight: 500;">
+                                <span>📄 内容: 18</span>
+                                <span>🔍 线索: 56</span>
+                                <span>💡 观点: 8</span>
+                                <span>📝 报告: 1</span>
+                            </div>
+                            <div style="margin-top: 12px; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden;">
+                                <div style="width: 30%; height: 100%; background: linear-gradient(90deg, var(--primary), #818CF8);"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card" style="grid-column: span 4;">
+                    <div class="card-header">
+                        <div class="card-title">课题动态</div>
+                    </div>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <div style="font-size: 13px; font-weight: 800; color: var(--text-primary);">AI 自动提取 5 条新线索</div>
+                                <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">来自 "NASA 预算报告" 和 "SpaceX 发射动态"</div>
+                                <div style="font-size: 11px; color: var(--text-muted); margin-top: 6px; font-weight: 500;">10分钟前</div>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot" style="border-color: #818CF8;"></div>
+                            <div class="timeline-content">
+                                <div style="font-size: 13px; font-weight: 800; color: var(--text-primary);">王强 上传了研究报告 v2</div>
+                                <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">《热防护材料烧蚀试验数据对比》</div>
+                                <div style="font-size: 11px; color: var(--text-muted); margin-top: 6px; font-weight: 500;">2小时前</div>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot" style="border-color: var(--success);"></div>
+                            <div class="timeline-content">
+                                <div style="font-size: 13px; font-weight: 800; color: var(--text-primary);">课题协作邀请已接受</div>
+                                <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">李芳 加入 "低轨星座频谱" 课题</div>
+                                <div style="font-size: 11px; color: var(--text-muted); margin-top: 6px; font-weight: 500;">昨天</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 创作中心 -->
+        <div id="page-creation" class="page">
+            <div class="creation-container">
+                <!-- AI 智能创作主区域 -->
+                <div class="creation-ai-section">
+                    <div class="creation-ai-header">
+                        <i class="ri-sparkling-2-fill"></i>
+                        <span>AI 智能创作</span>
+                    </div>
+
+                    <!-- 智能体选择器 -->
+                    <div class="creation-agent-selector">
+                        <div class="creation-agent-list">
+                            <div class="creation-agent-item active" data-agent="general" onclick="selectCreationAgent(this, 'general')">
+                                <div class="creation-agent-icon">🎯</div>
+                                <div class="creation-agent-name">通用创作</div>
+                            </div>
+                            <div class="creation-agent-item" data-agent="proposal" onclick="selectCreationAgent(this, 'proposal')">
+                                <div class="creation-agent-icon">📋</div>
+                                <div class="creation-agent-name">开题报告</div>
+                            </div>
+                            <div class="creation-agent-item" data-agent="research" onclick="selectCreationAgent(this, 'research')">
+                                <div class="creation-agent-icon">📊</div>
+                                <div class="creation-agent-name">研究报告</div>
+                            </div>
+                            <div class="creation-agent-item" data-agent="brief" onclick="selectCreationAgent(this, 'brief')">
+                                <div class="creation-agent-icon">📰</div>
+                                <div class="creation-agent-name">情报简报</div>
+                            </div>
+                            <div class="creation-agent-item" data-agent="translate" onclick="selectCreationAgent(this, 'translate')">
+                                <div class="creation-agent-icon">🌐</div>
+                                <div class="creation-agent-name">翻译文档</div>
+                            </div>
+                            <div class="creation-agent-item" data-agent="ppt" onclick="selectCreationAgent(this, 'ppt')">
+                                <div class="creation-agent-icon">📑</div>
+                                <div class="creation-agent-name">PPT 创作</div>
+                            </div>
+                            <div class="creation-agent-item creation-agent-more" onclick="navigate('agents')">
+                                <div class="creation-agent-icon"><i class="ri-add-line"></i></div>
+                                <div class="creation-agent-name">更多智能体</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 输入框 -->
+                    <div class="creation-input-area">
+                        <textarea id="creationInput" class="creation-textarea" placeholder="你想写什么？描述你的创作需求..." rows="4"></textarea>
+                        <div class="creation-input-toolbar">
+                            <div class="creation-ds-inline">
+                                <i class="ri-database-2-line"></i>
+                                <select class="creation-ds-select">
+                                    <option>参考数据</option>
+                                    <option>全部专题库</option>
+                                    <option>高超声速技术</option>
+                                    <option>低轨星座</option>
+                                    <option>遥感解译</option>
+                                    <option>火箭推进</option>
+                                </select>
+                            </div>
+                            <div class="creation-upload-icon" onclick="uploadAttachment()" title="上传附件">
+                                <i class="ri-attachment-2"></i>
+                            </div>
+                        </div>
+                        <div class="creation-input-count">0/500字</div>
+                    </div>
+
+                    <!-- 开始创作按钮 -->
+                    <button class="creation-start-btn" onclick="startCreation()">
+                        <span>开始创作</span>
+                    </button>
+                </div>
+
+                <!-- 其他方式 -->
+                <div class="creation-other-section">
+                    <div class="creation-other-label">其他方式</div>
+                    <div class="creation-other-grid">
+                        <div class="creation-other-card" onclick="importLocalDocument()">
+                            <div class="creation-other-icon">
+                                <i class="ri-file-upload-line"></i>
+                            </div>
+                            <div class="creation-other-title">导入本地文档</div>
+                            <div class="creation-other-desc">支持 Word、TXT、PPT</div>
+                        </div>
+                        <div class="creation-other-card" onclick="createBlankDocument()">
+                            <div class="creation-other-icon">
+                                <i class="ri-file-add-line"></i>
+                            </div>
+                            <div class="creation-other-title">创建空白文档</div>
+                            <div class="creation-other-desc">从零开始自由创作</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 最近创作 -->
+                <div class="creation-recent-section">
+                    <div class="creation-recent-header">
+                        <div class="creation-recent-title">最近创作</div>
+                        <div class="creation-recent-more" onclick="alert('查看全部创作')">全部 →</div>
+                    </div>
+                    <div class="creation-recent-list">
+                        <div class="creation-recent-item">
+                            <div class="creation-recent-icon">📄</div>
+                            <div class="creation-recent-info">
+                                <div class="creation-recent-name">高超声速飞行器热防护材料进展分析</div>
+                                <div class="creation-recent-meta">研究报告 · 2小时前 · 协作中</div>
+                            </div>
+                            <div class="creation-recent-status editing">编辑中</div>
+                        </div>
+                        <div class="creation-recent-item">
+                            <div class="creation-recent-icon">📰</div>
+                            <div class="creation-recent-info">
+                                <div class="creation-recent-name">2026年Q1低轨星座部署动态简报</div>
+                                <div class="creation-recent-meta">情报简报 · 昨天 · 已完成</div>
+                            </div>
+                            <div class="creation-recent-status done">已完成</div>
+                        </div>
+                        <div class="creation-recent-item">
+                            <div class="creation-recent-icon">📋</div>
+                            <div class="creation-recent-info">
+                                <div class="creation-recent-name">可重复使用运载器热防护系统研究开题报告</div>
+                                <div class="creation-recent-meta">开题报告 · 3天前 · 审校中</div>
+                            </div>
+                            <div class="creation-recent-status review">审校中</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 翻译中心 -->
+        <div id="page-translation" class="page">
+            <div class="page-header">
+                <div class="page-header-left">
+                    <h1>🌐 翻译中心</h1>
+                    <p>航天航空领域专业翻译任务管理与AI辅助翻译（象胥翻译）</p>
+                </div>
+            </div>
+            <div class="dashboard-grid" style="margin-bottom: 20px;">
+                <div class="card stat-card">
+                    <div class="stat-label">进行中项目</div>
+                    <div class="stat-value">4</div>
+                    <div style="font-size: 12px; color: var(--warning); margin-top: 4px; font-weight: 600;">2个即将到期</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-label">待审校任务</div>
+                    <div class="stat-value">7</div>
+                    <div style="font-size: 12px; color: var(--primary); margin-top: 4px; font-weight: 600;">↑ 3 今日新增</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-label">本月完成字数</div>
+                    <div class="stat-value">45.2万</div>
+                    <div style="font-size: 12px; color: var(--success); margin-top: 4px; font-weight: 600;">↑ 12% 环比</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-label">术语库条目</div>
+                    <div class="stat-value">8,650</div>
+                    <div style="font-size: 12px; color: var(--primary); margin-top: 4px; font-weight: 600;">AI补充 23 条</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">翻译任务列表</div>
+                    <div style="display: flex; gap: 8px;">
+                        <span class="filter-chip active">全部</span>
+                        <span class="filter-chip">待翻译</span>
+                        <span class="filter-chip">审校中</span>
+                        <span class="filter-chip">已完成</span>
+                    </div>
+                </div>
+                <table class="trans-table">
+                    <thead>
+                        <tr>
+                            <th>任务名称</th>
+                            <th>项目</th>
+                            <th>字数</th>
+                            <th>译员</th>
+                            <th>截止日期</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div style="font-weight: 700; color: var(--text-primary);">NASA FY2026 Budget Request Summary</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">英译中 · 航天预算 · 高专业度</div>
+                            </td>
+                            <td>美国航天动态跟踪</td>
+                            <td>12,500</td>
+                            <td>李明</td>
+                            <td>2026-05-20</td>
+                            <td><span class="status-badge status-progress">翻译中</span></td>
+                            <td><button class="feed-ai-btn" onclick="sendAgentPrompt('象胥翻译')">象胥辅助</button></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div style="font-weight: 700; color: var(--text-primary);">ESA Ariane 6 技术手册 Chapter 3-4</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">法译中 · 运载火箭 · 技术规范</div>
+                            </td>
+                            <td>欧洲运载器研究</td>
+                            <td>28,000</td>
+                            <td>王芳</td>
+                            <td>2026-05-22</td>
+                            <td><span class="status-badge status-review">审校中</span></td>
+                            <td><button class="feed-ai-btn" onclick="sendAgentPrompt('术语检查')">术语检查</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 智能体广场 -->
+        <div id="page-agents" class="page">
+            <div class="page-header">
+                <div class="page-header-left">
+                    <h1>🤖 智能体广场</h1>
+                    <p>发现、创建和配置面向航天航空研判场景的专业AI智能体</p>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                <div class="card" style="padding: 0; overflow: hidden; cursor: pointer; transition: all 0.3s;">
+                    <div style="height: 140px; background: linear-gradient(135deg, #4F46E5, #7C3AED); display: flex; align-items: center; justify-content: center; font-size: 48px;">🛰️</div>
+                    <div style="padding: 20px;">
+                        <div style="font-size: 11px; font-weight: 800; color: var(--primary); margin-bottom: 6px;">官方智能体</div>
+                        <div style="font-size: 16px; font-weight: 800; margin-bottom: 8px;">航天情报分析师</div>
+                        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px;">自动追踪全球航天发射动态，生成每日情报摘要，识别技术突破与战略意图</div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-muted); font-weight: 500;">
+                            <span>使用 1.2k 次</span>
+                            <button class="feed-ai-btn" style="padding: 6px 12px;">添加到工作台</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card" style="padding: 0; overflow: hidden; cursor: pointer; transition: all 0.3s;">
+                    <div style="height: 140px; background: linear-gradient(135deg, #059669, #10B981); display: flex; align-items: center; justify-content: center; font-size: 48px;">🗺️</div>
+                    <div style="padding: 20px;">
+                        <div style="font-size: 11px; font-weight: 800; color: var(--primary); margin-bottom: 6px;">官方智能体</div>
+                        <div style="font-size: 16px; font-weight: 800; margin-bottom: 8px;">遥感影像解译助手</div>
+                        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px;">基于多源遥感数据，自动识别机场、发射场、港口等军事/航天设施变化</div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-muted); font-weight: 500;">
+                            <span>使用 856 次</span>
+                            <button class="feed-ai-btn" style="padding: 6px 12px;">添加到工作台</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card" style="padding: 0; overflow: hidden; cursor: pointer; transition: all 0.3s;">
+                    <div style="height: 140px; background: linear-gradient(135deg, #D97706, #F59E0B); display: flex; align-items: center; justify-content: center; font-size: 48px;">🌐</div>
+                    <div style="padding: 20px;">
+                        <div style="font-size: 11px; font-weight: 800; color: var(--success); margin-bottom: 6px;">用户创建</div>
+                        <div style="font-size: 16px; font-weight: 800; margin-bottom: 8px;">象胥翻译专家</div>
+                        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px;">航天航空领域专业术语翻译与审校，支持英/法/俄/日多语种技术文档</div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-muted); font-weight: 500;">
+                            <span>使用 2.3k 次</span>
+                            <button class="feed-ai-btn" style="padding: 6px 12px;">添加到工作台</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 算力超市 -->
+        <div id="page-compute" class="page">
+            <div class="page-header">
+                <div class="page-header-left">
+                    <h1>⚡ 算力超市</h1>
+                    <p>模型训练、遥感数据处理、大规模文献分析所需的算力资源调度</p>
+                </div>
+            </div>
+            <div class="card" style="text-align: center; padding: 80px 40px;">
+                <div style="font-size: 56px; margin-bottom: 20px;">🚀</div>
+                <div style="font-size: 20px; font-weight: 800; margin-bottom: 10px;">算力资源调度中心</div>
+                <div style="color: var(--text-muted); font-size: 15px; max-width: 500px; margin: 0 auto; line-height: 1.6;">
+                    GPU集群状态监控 · 任务队列管理 · 模型训练日志 · 遥感影像并行处理
+                </div>
+            </div>
+        </div>
+
+        <!-- 数据管理 -->
+        <div id="page-datamgmt" class="page">
+            <div class="page-header">
+                <div class="page-header-left">
+                    <h1>🗃️ 数据管理</h1>
+                    <p>机构内部数据与外部信源数据的统一管理、清洗与血缘追踪</p>
+                </div>
+            </div>
+            <div class="card" style="text-align: center; padding: 80px 40px;">
+                <div style="font-size: 56px; margin-bottom: 20px;">🗄️</div>
+                <div style="font-size: 20px; font-weight: 800; margin-bottom: 10px;">数据资产管理中心</div>
+                <div style="color: var(--text-muted); font-size: 15px; max-width: 500px; margin: 0 auto; line-height: 1.6;">
+                    内部数据库 · 外部API接入 · 数据血缘图谱 · 质量监控仪表盘
+                </div>
+            </div>
+        </div>
+
+        <!-- 系统管理 -->
+        <div id="page-system" class="page">
+            <div class="page-header">
+                <div class="page-header-left">
+                    <h1>⚙️ 系统管理</h1>
+                    <p>团队管理、角色权限、术语库维护与基础配置</p>
+                </div>
+            </div>
+            <div class="dashboard-grid">
+                <div class="card" style="grid-column: span 6;">
+                    <div class="card-header">
+                        <div class="card-title">团队管理</div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <div style="padding: 16px; background: var(--bg-body); border-radius: var(--radius-md); border: 1px solid var(--border); cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">
+                            <div style="font-weight: 800; color: var(--text-primary); margin-bottom: 4px;">翻译团队 (8人)</div>
+                            <div style="font-size: 13px; color: var(--text-muted);">项目经理: 2 | 译员: 6</div>
+                        </div>
+                        <div style="padding: 16px; background: var(--bg-body); border-radius: var(--radius-md); border: 1px solid var(--border); cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">
+                            <div style="font-weight: 800; color: var(--text-primary); margin-bottom: 4px;">情报分析部门 (15人)</div>
+                            <div style="font-size: 13px; color: var(--text-muted);">研究员: 5 | 分析师: 6 | 策展师: 2 | 信息员: 2</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card" style="grid-column: span 6;">
+                    <div class="card-header">
+                        <div class="card-title">术语管理</div>
+                    </div>
+                    <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+                        <div style="font-size: 40px; margin-bottom: 12px;">📚</div>
+                        <div style="font-size: 18px; font-weight: 800; color: var(--text-primary); margin-bottom: 6px;">已收录术语 8,650 条</div>
+                        <div style="font-size: 13px;">覆盖中/英/法/俄/日/德 6个语种</div>
+                        <button class="feed-ai-btn" style="margin-top: 16px; padding: 8px 16px; font-size: 13px;">术语库维护</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 我的 -->
+        <div id="page-profile" class="page">
+            <div class="page-header">
+                <div class="page-header-left">
+                    <h1>👤 我的</h1>
+                </div>
+            </div>
+            <div class="card" style="max-width: 600px; margin: 0 auto; text-align: center; padding: 48px;">
+                <div style="width: 90px; height: 90px; border-radius: 50%; background: linear-gradient(135deg, #818CF8, var(--primary)); display: flex; align-items: center; justify-content: center; font-size: 36px; color: white; font-weight: 700; margin: 0 auto 20px;">张</div>
+                <div style="font-size: 22px; font-weight: 800; color: var(--text-primary);">张宇航</div>
+                <div style="color: var(--text-muted); margin-top: 6px; font-size: 14px;">高级研究员 | 情报分析部门</div>
+                <div style="display: flex; justify-content: center; gap: 40px; margin-top: 32px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 24px; font-weight: 800; color: var(--primary);">12</div>
+                        <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px; font-weight: 500;">在研课题</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 24px; font-weight: 800; color: var(--primary);">48</div>
+                        <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px; font-weight: 500;">完成报告</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 24px; font-weight: 800; color: var(--primary);">156</div>
+                        <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px; font-weight: 500;">提取线索</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="js/data.js"></script>
+    <script src="js/recommend.js"></script>
+    <script src="js/brief.js"></script>
+    <script src="js/sentinel.js"></script>
+    <script src="js/main.js"></script>
+
+</body>
+</html>
